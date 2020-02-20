@@ -1,0 +1,51 @@
+ // use App\Company;
+    // use App\Topic;
+    /**
+     * Get any additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        // dump($this->company);
+        //**  1 solution */
+
+        // $included = new collection;
+
+        // if (isset($this->company)) {
+        //     $included->push(new CompanyResource($this->company));
+        // }
+
+        // if (isset($this->topics)) {
+        //     $this->topics->each(function ($topic) use ($included){
+        //         $included->push(new TopicResource($topic));
+        //     });
+        // }
+
+        // if (isset($this->products)) {
+        //     $this->products->each(function ($product) use ($included){
+        //         $included->push(new ProductResource($product));
+        //     });
+        // }
+
+        //** 2 solution */
+
+        $included = collect([
+            $this->company
+        ])->merge($this->topics)->map(function ($model) {
+            if ($model instanceof Company) {
+                return new CompanyResource($model);
+            } elseif ($model instanceof Topic) {
+                return new TopicResource($model);
+            }
+        })->filter()->unique()->values();
+
+        if ($included->isNotEmpty()) {
+            return [
+                'included' => $included
+            ];
+        }
+
+        return parent::with($request);
+    }
