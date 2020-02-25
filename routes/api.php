@@ -21,4 +21,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('users', UserController::class)->only(['show', 'update', 'destroy']);
 });
 
+Route::apiResource('events', EventController::class)->only(['index', 'show']);
 Route::apiResource('users', UserController::class)->only(['store']);
