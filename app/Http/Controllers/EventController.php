@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Event;
+use App\Http\Requests\EventStoreRequest;
 use App\Http\Resources\EventCollection;
 use App\Http\Resources\EventResource;
+use App\Traits\UploadTrait;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
+    use UploadTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -27,9 +32,19 @@ class EventController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(EventStoreRequest $request)
     {
-        //
+        $event = Event::create([
+            'additionel_information' => $request->additionel_information,
+            'date' => Carbon::parse($request->date),
+            'is_active' => false,
+            'picture' => $this->uploadOne($request->picture, '/uploads/images/', 'public', $request->title),
+            'publish_at' => Carbon::parse($request->publish_at),
+            'subtitle' => $request->subtitle,
+            'title' => $request->title,
+        ]);
+
+        return new EventResource($event);
     }
 
     /**
