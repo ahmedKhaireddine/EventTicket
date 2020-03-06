@@ -9,7 +9,7 @@ trait UploadTrait
 {
     public function uploadOne($uploadeFile, $folder, $disk = 'public', $filename = null){
 
-        $name = ! is_null($filename) ? $filename.'_'.time() : str_random(25).'_'.time();
+        $name = isset($filename) ? str_replace(' ', '_', $filename).'_'.time() : str_random(25).'_'.time();
 
         $filePath = "http://localhost/api/public{$folder}{$name}.{$uploadeFile->getClientOriginalExtension()}";
 
