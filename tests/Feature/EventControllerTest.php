@@ -167,7 +167,7 @@ class EventControllerTest extends TestCase
             'picture' => UploadedFile::fake()->image('avatar.jpg'),
             'publish_at' => Carbon::parse('20-12-2021'),
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-            'title' => 'ELUCUBRATIONS',
+            'title' => 'LES ELUCUBRATIONS',
         ];
 
         // Action
@@ -184,11 +184,11 @@ class EventControllerTest extends TestCase
                         'additionel_information' => 'Des informations utile.',
                         'date' => '20/12/2021',
                         'is_active' => false,
-                        'picture' => 'http://localhost/api/public/uploads/images/ELUCUBRATIONS_'. time() .'.jpg',
+                        'picture' => 'http://localhost/api/public/uploads/images/LES_ELUCUBRATIONS_'. time() .'.jpg',
                         'publish_at' => '20/12/2021',
                         'start_time' => '12:00',
                         'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-                        'title' => 'ELUCUBRATIONS',
+                        'title' => 'LES ELUCUBRATIONS',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
@@ -227,5 +227,138 @@ class EventControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(422);
+    }
+
+    // Update
+
+    public function test_can_update_event_when_user_is_not_connected_Http_code_401()
+    {
+        // Arrange
+        $data = factory(Event::class)->make()->toArray();
+        $event = factory(Event::class)->create();
+
+        // Action
+        $response = $this->json('PUT', route('events.update', $event->id), $data);
+
+        // Assert
+        $response->assertStatus(401);
+    }
+
+    public function test_can_update_event_when_event_dont_exists_return_Http_code_404()
+    {
+        // Arrange
+        $data = factory(Event::class)->make()->toArray();
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.show', $this->fakeEventId), $data);
+
+        // Assert
+        $response->assertNotFound();
+    }
+
+    public function test_can_update_event_when_event_title_exists_return_Http_code_422()
+    {
+        // Arrange
+        $event = factory(Event::class)->create([
+            'title' => 'ELUCUBRATIONS',
+        ]);
+
+        $secondEvent =  factory(Event::class)->create();
+
+        $data = [
+            'title' => 'ELUCUBRATIONS',
+        ];
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $secondEvent->id), $data);
+
+        // Assert
+        $response->assertStatus(422);
+    }
+
+    public function test_can_update_event_without_giving_data_return_Http_code_200()
+    {
+        // Arrange
+        $event = factory(Event::class)->create();
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $event->id));
+
+        // Assert
+        $response->assertStatus(200);
+    }
+
+    public function test_can_update_event_when_data_contains_a_picture_return_Http_code_200()
+    {
+        // Arrange
+        $data = [
+            'picture' => UploadedFile::fake()->image('avatar.jpg'),
+        ];
+
+        $event = factory(Event::class)->create();
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $event->id), $data);
+
+        // Assert
+        $response->assertStatus(200);
+    }
+
+    public function test_can_update_event_when_data_contains_a_date_and_publish_at_return_Http_code_200()
+    {
+        // Arrange
+        $data = [
+            'date' => Carbon::parse('20-12-2021 12:00'),
+            'publish_at' => Carbon::parse('20-12-2021'),
+        ];
+
+        $event = factory(Event::class)->create();
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $event->id), $data);
+
+        // Assert
+        $response->assertStatus(200);
+    }
+
+    public function test_can_update_event_return_Http_code_200_with_json()
+    {
+        // Arrange
+        $data = [
+            'additionel_information' => 'Des informations utile.',
+            'date' => Carbon::parse('20-12-2021 12:00'),
+            'picture' => UploadedFile::fake()->image('avatar.jpg'),
+            'publish_at' => Carbon::parse('20-12-2021'),
+            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+            'title' => 'LES ELUCUBRATIONS',
+        ];
+
+        $event = factory(Event::class)->create();
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $event->id), $data);
+
+        // Assert
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'type' => 'events',
+                    'id' => 1,
+                    'attributes' => [
+                        'additionel_information' => 'Des informations utile.',
+                        'date' => '20/12/2021',
+                        'is_active' => false,
+                        'picture' => 'http://localhost/api/public/uploads/images/LES_ELUCUBRATIONS_'. time() .'.jpg',
+                        'publish_at' => '20/12/2021',
+                        'start_time' => '12:00',
+                        'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                        'title' => 'LES ELUCUBRATIONS',
+                    ],
+                    'links' => [
+                        'self' => 'http://localhost/api/events/1',
+                    ]
+                ]
+            ]);
     }
 }

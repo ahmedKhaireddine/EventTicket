@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Event;
 use App\Http\Requests\EventStoreRequest;
+use App\Http\Requests\EventUpdateRequest;
 use App\Http\Resources\EventCollection;
 use App\Http\Resources\EventResource;
 use App\Traits\UploadTrait;
@@ -61,13 +62,32 @@ class EventController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  App\Http\Requests\EventUpdateRequest  $request
+     * @param  App\Event  $event
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(EventUpdateRequest $request, Event $event)
     {
-        //
+        $eventAttributes = $request->validated();
+
+        if (isset($eventAttributes['picture'])) {
+            $name = $eventAttributes['title'] ?? $event->title;
+            $eventAttributes['picture'] = $this->uploadOne($eventAttributes['picture'], '/uploads/images/', 'public', $name);
+        }
+
+        if (isset($eventAttributes['date'])) {
+            $eventAttributes['date'] = Carbon::parse($eventAttributes['date']);
+        }
+
+        if (isset($eventAttributes['publish_at'])) {
+            $eventAttributes['publish_at'] = Carbon::parse($eventAttributes['publish_at']);
+        }
+
+        $event->fill($eventAttributes);
+
+        $event->save();
+
+        return new EventResource($event);
     }
 
     /**
