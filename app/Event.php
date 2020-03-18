@@ -19,6 +19,7 @@ class Event extends Model
      * @var array
      */
     protected $casts = [
+        'event_program' => 'array',
         'is_active' => 'boolean',
     ];
 
@@ -28,25 +29,38 @@ class Event extends Model
      * @var array
      */
     protected $dates = [
-        'date',
-        'publish_at'
+        'end_date',
+        'publish_at',
+        'start_date',
     ];
 
-    public function getFormattedDateAttribute()
+    public function getFormattedStartDateAttribute()
     {
-        return $this->date->format('d/m/Y');
+        return $this->start_date->format('d/m/Y');
+    }
+
+    public function getFormattedEndDateAttribute()
+    {
+        return $this->end_date->format('d/m/Y');
     }
 
     public function getFormattedStartTimeAttribute()
     {
-        return $this->date->format('H:i');
+        return date('H:i', strtotime($this->start_time));
     }
 
     public function getFormattedPublishAtAttribute()
     {
-        return $this->date->format('d/m/Y');
+        return $this->publish_at->format('d/m/Y');
     }
 
+    /**
+     * Get the user that owns the event.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
 
 

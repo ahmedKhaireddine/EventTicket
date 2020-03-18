@@ -32,6 +32,17 @@ class UserResource extends JsonResource
                     'user' => $this,
                 ]),
             ],
+            'relationships' => [
+                'events' => [
+                    'data' => $this->events()->exists() ?
+                    $this->events->map(function ($event, $key) {
+                        return [
+                            'type' => 'events',
+                            'id' => $event->id
+                        ];
+                    }) : null
+                ]
+            ]
         ];
     }
 }
