@@ -25,9 +25,12 @@ class EventUpdateRequest extends FormRequest
     {
         return [
             'additionel_information' => 'string',
-            'date' => 'date',
+            'end_date' => 'date_format:Y-m-d',
+            'event_program' =>'array',
             'picture' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'publish_at' => 'date',
+            'publish_at' => 'date_format:Y-m-d',
+            'start_date' => 'date_format:Y-m-d',
+            'start_time' => 'date_format:H:i',
             'subtitle' => 'string|max:255',
             'title' => 'string|unique:events|max:255',
         ];

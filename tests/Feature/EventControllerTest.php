@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class EventControllerTest extends TestCase
 {
-    use DatabaseMigrations;
+    use DatabaseMigrations, RefreshDatabase;
 
     public function setUp(): void
     {
@@ -46,10 +46,13 @@ class EventControllerTest extends TestCase
         // Arrange
         $event = factory(Event::class)->create([
             'additionel_information' => 'Des informations utile.',
-            'date' => Carbon::parse('20-12-2021 12:00'),
+            'end_date' => '2021-12-21',
+            'event_program' => ['Des informations utile.', 'Des informations utile.'],
             'is_active' => false,
             'picture' => 'http://lorempixel.com/640/480/',
-            'publish_at' => Carbon::parse('20-12-2021'),
+            'publish_at' => '2021-12-20',
+            'start_date' => '2021-12-20',
+            'start_time' => '12:00',
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'LES ELUCUBRATIONS',
         ]);
@@ -68,16 +71,23 @@ class EventControllerTest extends TestCase
                         'id' => 1,
                         'attributes' => [
                             'additionel_information' => 'Des informations utile.',
-                            'date' => '20/12/2021',
+                            'end_date' => '21/12/2021',
+                            'event_program' => ['Des informations utile.', 'Des informations utile.'],
                             'is_active' => false,
                             'picture' => 'http://lorempixel.com/640/480/',
                             'publish_at' => '20/12/2021',
+                            'start_date' => '20/12/2021',
                             'start_time' => '12:00',
                             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
                             'title' => 'LES ELUCUBRATIONS',
                         ],
                         'links' => [
                             'self' => 'http://localhost/api/events/1',
+                        ],
+                        "relationships" => [
+                            "user" => [
+                                "data" => null
+                            ]
                         ]
                     ]
                 ]
@@ -109,10 +119,10 @@ class EventControllerTest extends TestCase
         // Arrange
         $event = factory(Event::class)->create([
             'additionel_information' => 'Des informations utile.',
-            'date' => Carbon::parse('20-12-2021 12:00'),
+            'start_date' => '2021-12-20',
             'is_active' => false,
             'picture' => 'http://lorempixel.com/640/480/',
-            'publish_at' => Carbon::parse('20-12-2021'),
+            'publish_at' => '2021-12-20',
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'LES ELUCUBRATIONS',
         ]);
@@ -129,16 +139,20 @@ class EventControllerTest extends TestCase
                     'id' => 1,
                     'attributes' => [
                         'additionel_information' => 'Des informations utile.',
-                        'date' => '20/12/2021',
                         'is_active' => false,
                         'picture' => 'http://lorempixel.com/640/480/',
                         'publish_at' => '20/12/2021',
-                        'start_time' => '12:00',
+                        'start_date' => '20/12/2021',
                         'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
                         'title' => 'LES ELUCUBRATIONS',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
+                    ],
+                    "relationships" => [
+                        "user" => [
+                            "data" => null
+                        ]
                     ]
                 ]
             ]);
@@ -163,9 +177,12 @@ class EventControllerTest extends TestCase
         // Arrange
         $data = [
             'additionel_information' => 'Des informations utile.',
-            'date' => Carbon::parse('20-12-2021 12:00'),
+            'end_date' => '2021-12-21',
+            'event_program' => ['Des informations utile.', 'Des informations utile.'],
             'picture' => UploadedFile::fake()->image('avatar.jpg'),
-            'publish_at' => Carbon::parse('20-12-2021'),
+            'publish_at' => '2021-12-20',
+            'start_date' => '2021-12-20',
+            'start_time' => '12:00',
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'LES ELUCUBRATIONS',
         ];
@@ -182,16 +199,26 @@ class EventControllerTest extends TestCase
                     'id' => 1,
                     'attributes' => [
                         'additionel_information' => 'Des informations utile.',
-                        'date' => '20/12/2021',
+                        'end_date' => '21/12/2021',
+                        'event_program' => ['Des informations utile.', 'Des informations utile.'],
                         'is_active' => false,
                         'picture' => 'http://localhost/api/public/uploads/images/LES_ELUCUBRATIONS_'. time() .'.jpg',
                         'publish_at' => '20/12/2021',
+                        'start_date' => '20/12/2021',
                         'start_time' => '12:00',
                         'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
                         'title' => 'LES ELUCUBRATIONS',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
+                    ],
+                    'relationships' => [
+                        'user' => [
+                            'data' => [
+                                'type' => 'users',
+                                'id' => $this->user->id
+                            ]
+                        ]
                     ]
                 ]
             ]);
@@ -215,9 +242,9 @@ class EventControllerTest extends TestCase
 
         $data = [
             'additionel_information' => 'Des informations utile.',
-            'date' => Carbon::parse('20-12-2021 12:00'),
+            'start_date' => '2021-12-20',
             'picture' => UploadedFile::fake()->image('avatar.jpg'),
-            'publish_at' => Carbon::parse('20-12-2021'),
+            'publish_at' => '2021-12-20',
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'ELUCUBRATIONS',
         ];
@@ -308,8 +335,10 @@ class EventControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'date' => Carbon::parse('20-12-2021 12:00'),
-            'publish_at' => Carbon::parse('20-12-2021'),
+            'end_date' => '2020-12-21',
+            'publish_at' => '2020-12-20',
+            'start_date' => '2020-12-20',
+            'start_time' => '12:00',
         ];
 
         $event = factory(Event::class)->create();
@@ -326,14 +355,18 @@ class EventControllerTest extends TestCase
         // Arrange
         $data = [
             'additionel_information' => 'Des informations utile.',
-            'date' => Carbon::parse('20-12-2021 12:00'),
+            'end_date' => '2021-12-21',
+            'event_program' => ['Des informations utile.', 'Des informations utile.'],
             'picture' => UploadedFile::fake()->image('avatar.jpg'),
-            'publish_at' => Carbon::parse('20-12-2021'),
+            'publish_at' => '2021-12-20',
+            'start_date' => '2021-12-20',
+            'start_time' => '12:00',
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'LES ELUCUBRATIONS',
         ];
 
         $event = factory(Event::class)->create();
+        $event->user()->associate($this->user)->save();
 
         // Action
         $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $event->id), $data);
@@ -347,16 +380,26 @@ class EventControllerTest extends TestCase
                     'id' => 1,
                     'attributes' => [
                         'additionel_information' => 'Des informations utile.',
-                        'date' => '20/12/2021',
+                        'end_date' => '21/12/2021',
+                        'event_program' => ['Des informations utile.', 'Des informations utile.'],
                         'is_active' => false,
                         'picture' => 'http://localhost/api/public/uploads/images/LES_ELUCUBRATIONS_'. time() .'.jpg',
                         'publish_at' => '20/12/2021',
+                        'start_date' => '20/12/2021',
                         'start_time' => '12:00',
                         'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
                         'title' => 'LES ELUCUBRATIONS',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
+                    ],
+                    'relationships' => [
+                        'user' => [
+                            'data' => [
+                                'type' => 'users',
+                                'id' => $this->user->id
+                            ]
+                        ]
                     ]
                 ]
             ]);

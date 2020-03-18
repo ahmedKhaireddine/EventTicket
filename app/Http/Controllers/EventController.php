@@ -37,13 +37,18 @@ class EventController extends Controller
     {
         $event = Event::create([
             'additionel_information' => $request->additionel_information,
-            'date' => Carbon::parse($request->date),
+            'end_date' => Carbon::parse($request->end_date),
+            'event_program' => $request->event_program,
             'is_active' => false,
             'picture' => $this->uploadOne($request->picture, '/uploads/images/', 'public', $request->title),
             'publish_at' => Carbon::parse($request->publish_at),
+            'start_date' => Carbon::parse($request->start_date),
+            'start_time' => Carbon::parse($request->start_time),
             'subtitle' => $request->subtitle,
             'title' => $request->title,
         ]);
+
+        $event->user()->associate($request->user())->save();
 
         return new EventResource($event);
     }
@@ -70,17 +75,26 @@ class EventController extends Controller
     {
         $eventAttributes = $request->validated();
 
+
+        if (isset($eventAttributes['end_date'])) {
+            $eventAttributes['end_date'] = Carbon::parse($eventAttributes['end_date']);
+        }
+
         if (isset($eventAttributes['picture'])) {
             $name = $eventAttributes['title'] ?? $event->title;
             $eventAttributes['picture'] = $this->uploadOne($eventAttributes['picture'], '/uploads/images/', 'public', $name);
         }
 
-        if (isset($eventAttributes['date'])) {
-            $eventAttributes['date'] = Carbon::parse($eventAttributes['date']);
-        }
-
         if (isset($eventAttributes['publish_at'])) {
             $eventAttributes['publish_at'] = Carbon::parse($eventAttributes['publish_at']);
+        }
+
+        if (isset($eventAttributes['start_date'])) {
+            $eventAttributes['start_date'] = Carbon::parse($eventAttributes['start_date']);
+        }
+
+        if (isset($eventAttributes['start_time'])) {
+            $eventAttributes['start_time'] = Carbon::parse($eventAttributes['start_time']);
         }
 
         $event->fill($eventAttributes);

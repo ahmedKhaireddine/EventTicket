@@ -21,11 +21,19 @@ class EventResource extends JsonResource
                 'created_at' => $this->created_at->toDateTimeString(),
                 'updated_at' => $this->updated_at->toDateTimeString(),
                 'additionel_information' => $this->additionel_information,
-                'date' => $this->formatted_date,
+                'end_date' => $this->when(isset($this->formatted_end_date), function () {
+                    return $this->formatted_end_date;
+                }),
+                'event_program' => $this->when(isset($this->event_program), function () {
+                    return $this->event_program;
+                }),
                 'is_active' => $this->is_active,
                 'picture' => $this->picture,
                 'publish_at' => $this->formatted_publish_at,
-                'start_time' => $this->when(isset($this->formatted_start_time), $this->formatted_start_time),
+                'start_date' => $this->formatted_start_date,
+                'start_time' => $this->when(isset($this->formatted_start_time), function () {
+                    return $this->formatted_start_time;
+                }),
                 'subtitle' => $this->subtitle,
                 'title' => $this->title,
             ],
@@ -33,6 +41,14 @@ class EventResource extends JsonResource
                 'self' => route('events.show', [
                     'event' => $this,
                 ])
+            ],
+            'relationships' => [
+                'user' => [
+                    'data' => $this->user()->exists() ? [
+                        'type' => 'users',
+                        'id'   => $this->user->id,
+                    ] : null,
+                ]
             ]
         ];
     }
