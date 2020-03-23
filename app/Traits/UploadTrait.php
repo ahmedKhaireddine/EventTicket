@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Storage;
 
 trait UploadTrait
 {
-    public function uploadOne($uploadeFile, $folder, $disk = 'public', $filename = null){
-
+    public function uploadOne($uploadeFile, string $folder, string $disk = 'public', string $filename = null)
+    {
         $name = isset($filename) ? str_replace(' ', '_', $filename).'_'.time() : str_random(25).'_'.time();
 
         $filePath = "http://localhost/api/public{$folder}{$name}.{$uploadeFile->getClientOriginalExtension()}";
@@ -17,5 +17,4 @@ trait UploadTrait
 
         return $filePath;
     }
-
 }
