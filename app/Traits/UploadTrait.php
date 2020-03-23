@@ -13,7 +13,7 @@ trait UploadTrait
 
         $filePath = "http://localhost/api/public{$folder}{$name}.{$uploadeFile->getClientOriginalExtension()}";
 
-        $file = $uploadeFile->storeAs($folder, $name. '.' . $uploadeFile->getClientOriginalExtension(), $disk);
+        $file = $uploadeFile->storeAs($folder, "{$name}.{$uploadeFile->getClientOriginalExtension()}", $disk);
 
         return $filePath;
     }
