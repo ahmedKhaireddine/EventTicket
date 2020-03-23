@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Address;
 use App\Event;
 use App\User;
 use Carbon\Carbon;
@@ -44,6 +45,15 @@ class EventControllerTest extends TestCase
     public function test_can_get_all_list_of_event_with_a_complete_json_response_return_http_code_200()
     {
         // Arrange
+        $address = factory(Address::class)->create([
+            'additionel_information' => 'Suite 584',
+            'city' => 'Port Bobbyfurt',
+            'country' => 'Bahamas',
+            'postal_code' => '95929-9607',
+            'street_address' => '2316 Clemmie Throughway',
+            'venue' => 'Maggio LLC'
+        ]);
+
         $event = factory(Event::class)->create([
             'additionel_information' => 'Des informations utile.',
             'end_date' => '2021-12-21',
@@ -56,6 +66,8 @@ class EventControllerTest extends TestCase
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'LES ELUCUBRATIONS',
         ]);
+
+        $event->address()->associate($address)->save();
 
         // Action
         $response = $this->json('GET', route('events.index'));
@@ -71,6 +83,15 @@ class EventControllerTest extends TestCase
                         'id' => 1,
                         'attributes' => [
                             'additionel_information' => 'Des informations utile.',
+                            'address' => [
+                                'additionel_information' => 'Suite 584',
+                                'city' => 'Port Bobbyfurt',
+                                'country' => 'Bahamas',
+                                'postal_code' => '95929-9607',
+                                'street_address' => '2316 Clemmie Throughway',
+                                'venue' => 'Maggio LLC',
+                                'full_address' => '2316 Clemmie Throughway, 95929-9607 Port Bobbyfurt',
+                            ],
                             'end_date' => '21/12/2021',
                             'event_program' => ['Des informations utile.', 'Des informations utile.'],
                             'is_active' => false,
@@ -84,9 +105,15 @@ class EventControllerTest extends TestCase
                         'links' => [
                             'self' => 'http://localhost/api/events/1',
                         ],
-                        "relationships" => [
-                            "user" => [
-                                "data" => null
+                        'relationships' => [
+                            'address' => [
+                                'data' => [
+                                    'type' => 'addresses',
+                                    'id' => $address->id
+                                ]
+                            ],
+                            'user' => [
+                                'data' => null
                             ]
                         ]
                     ]
@@ -149,9 +176,12 @@ class EventControllerTest extends TestCase
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
                     ],
-                    "relationships" => [
-                        "user" => [
-                            "data" => null
+                    'relationships' => [
+                        'address' => [
+                            'data' => null
+                        ],
+                        'user' => [
+                            'data' => null
                         ]
                     ]
                 ]
@@ -213,6 +243,9 @@ class EventControllerTest extends TestCase
                         'self' => 'http://localhost/api/events/1',
                     ],
                     'relationships' => [
+                        'address' => [
+                            'data' => null
+                        ],
                         'user' => [
                             'data' => [
                                 'type' => 'users',
@@ -224,7 +257,7 @@ class EventControllerTest extends TestCase
             ]);
     }
 
-    public function test_can_store_event_without_giving_data_return_Httap_code_422()
+    public function test_can_store_event_without_giving_data_return_Http_code_422()
     {
         // Action
         $response = $this->actingAs($this->user, 'api')->json('POST', route('events.store'));
@@ -233,7 +266,7 @@ class EventControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_can_store_event_when_event_title_exists_return_Httap_code_422()
+    public function test_can_store_event_when_event_title_exists_return_Http_code_422()
     {
         // Arrange
         $event = factory(Event::class)->create([
@@ -394,6 +427,9 @@ class EventControllerTest extends TestCase
                         'self' => 'http://localhost/api/events/1',
                     ],
                     'relationships' => [
+                        'address' => [
+                            'data' => null
+                        ],
                         'user' => [
                             'data' => [
                                 'type' => 'users',
