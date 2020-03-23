@@ -21,6 +21,11 @@ class EventResource extends JsonResource
                 'created_at' => $this->created_at->toDateTimeString(),
                 'updated_at' => $this->updated_at->toDateTimeString(),
                 'additionel_information' => $this->additionel_information,
+                $this->mergeWhen($this->address()->exists(), function () {
+                    return [
+                        'address' => $this->address->toArray()
+                    ];
+                }),
                 'end_date' => $this->when(isset($this->formatted_end_date), function () {
                     return $this->formatted_end_date;
                 }),
@@ -43,11 +48,17 @@ class EventResource extends JsonResource
                 ])
             ],
             'relationships' => [
+                'address' => [
+                    'data' => $this->address()->exists() ? [
+                        'type' => 'addresses',
+                        'id' => $this->address->id
+                    ] : null
+                ],
                 'user' => [
                     'data' => $this->user()->exists() ? [
                         'type' => 'users',
                         'id'   => $this->user->id,
-                    ] : null,
+                    ] : null
                 ]
             ]
         ];

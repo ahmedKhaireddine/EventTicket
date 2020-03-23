@@ -61,6 +61,14 @@ class Event extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Get the address that owns the event.
+     */
+    public function address()
+    {
+        return $this->belongsTo(Address::class);
+    }
 }
 
 
