@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -31,7 +33,13 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::guard('api')->user();
+
+        $users = User::select('id', 'first_name', 'last_name', 'role')
+            ->where('id', '!=', $user->id)
+            ->get();
+
+        return new UserCollection($users);
     }
 
     /**

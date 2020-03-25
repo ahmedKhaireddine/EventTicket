@@ -18,6 +18,8 @@ class UserControllerTest extends TestCase
         parent::setUp();
 
         $this->user = factory(User::class)->create([
+            'first_name' => 'Lea',
+            'last_name' => 'Dubois',
             'role' => 'user'
         ]);
 
@@ -26,8 +28,76 @@ class UserControllerTest extends TestCase
         ]);
 
         $this->anotherUser = factory(User::class)->create([
+            'first_name' => 'Alice',
+            'last_name' => 'Petit',
             'role' => 'user'
         ]);
+    }
+
+    // Index
+
+    public function test_can_get_all_users_when_user_is_not_connected_return_Http_code_401()
+    {
+        // Action
+        $response = $this->json('GET', route('users.index'));
+
+        // Assert
+        $response->assertStatus(401);
+    }
+
+    public function test_can_get_all_users_when_user_is_not_admin_return_Http_code_403()
+    {
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('GET', route('users.index'));
+
+        // Assert
+        $response->assertForbidden();
+    }
+
+    public function test_can_get_all_users_when_user_is_admin_return_Http_code_200()
+    {
+        // Action
+        $response = $this->actingAs($this->userAdmin, 'api')->json('GET', route('users.index'));
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJson([
+                'data' => [
+                    [
+                        'id' => 1,
+                        'attributes' => [
+                            'first_name' => 'Lea',
+                            'last_name' => 'Dubois',
+                            'role' => 'user',
+                        ],
+                        'links' => [
+                            'self' => 'http://localhost/api/users/1',
+                        ],
+                        'relationships' => [
+                            'events' => [
+                                'data' => null
+                            ]
+                        ]
+                    ],
+                    [
+                        'id' => 3,
+                        'attributes' => [
+                            'first_name' => 'Alice',
+                            'last_name' => 'Petit',
+                            'role' => 'user',
+                        ],
+                        'links' => [
+                            'self' => 'http://localhost/api/users/3',
+                        ],
+                        'relationships' => [
+                            'events' => [
+                                'data' => null
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
     }
 
     // Show
@@ -75,6 +145,11 @@ class UserControllerTest extends TestCase
                     'links' => [
                         'self' => 'http://localhost/api/users/4',
                     ],
+                    'relationships' => [
+                        'events' => [
+                            'data' => null
+                        ]
+                    ]
                 ]
             ]);
     }
@@ -142,6 +217,11 @@ class UserControllerTest extends TestCase
                     'links' => [
                         'self' => 'http://localhost/api/users/4',
                     ],
+                    'relationships' => [
+                        'events' => [
+                            'data' => null
+                        ]
+                    ]
                 ]
             ]);
     }
@@ -244,6 +324,11 @@ class UserControllerTest extends TestCase
                     'links' => [
                         'self' => 'http://localhost/api/users/1',
                     ],
+                    'relationships' => [
+                        'events' => [
+                            'data' => null
+                        ]
+                    ]
                 ]
             ]);
     }
