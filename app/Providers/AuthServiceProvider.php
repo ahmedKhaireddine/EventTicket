@@ -26,6 +26,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        Gate::define('to-speak', function ($user, $user_id) {
+            return $user->id != $user_id;
+        });
     }
 }
