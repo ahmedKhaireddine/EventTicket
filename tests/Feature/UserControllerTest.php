@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Message;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,6 +25,8 @@ class UserControllerTest extends TestCase
         ]);
 
         $this->userAdmin = factory(User::class)->create([
+            'first_name' => 'Martin',
+            'last_name' => 'Legrand',
             'role' => 'admin'
         ]);
 
@@ -45,17 +48,44 @@ class UserControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    public function test_can_get_all_users_when_user_is_not_admin_return_Http_code_403()
+    public function test_can_get_all_users_when_user_is_not_admin_return_Http_code_200()
     {
         // Action
         $response = $this->actingAs($this->user, 'api')->json('GET', route('users.index'));
 
         // Assert
-        $response->assertForbidden();
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJson([
+                'data' => [
+                    [
+                        'id' => 2,
+                        'attributes' => [
+                            'first_name' => 'Martin',
+                            'last_name' => 'Legrand',
+                            'role' => 'admin',
+                        ],
+                        'links' => [
+                            'self' => 'http://localhost/api/users/2',
+                        ],
+                        'relationships' => [
+                            'events' => [
+                                'data' => null
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
     }
 
-    public function test_can_get_all_users_when_user_is_admin_return_Http_code_200()
+    public function test_can_get_all_users_when_user_is_admin_and_has_messges_return_Http_code_200()
     {
+        // Arrange
+        $messages = factory(Message::class, 2)->create([
+            'from_id' => $this->anotherUser->id,
+            'to_id' => $this->userAdmin->id
+        ]);
+
         // Action
         $response = $this->actingAs($this->userAdmin, 'api')->json('GET', route('users.index'));
 
@@ -65,14 +95,15 @@ class UserControllerTest extends TestCase
             ->assertJson([
                 'data' => [
                     [
-                        'id' => 1,
+                        'id' => 3,
                         'attributes' => [
-                            'first_name' => 'Lea',
-                            'last_name' => 'Dubois',
+                            'first_name' => 'Alice',
+                            'last_name' => 'Petit',
+                            'messages_not_read' => 2,
                             'role' => 'user',
                         ],
                         'links' => [
-                            'self' => 'http://localhost/api/users/1',
+                            'self' => 'http://localhost/api/users/3',
                         ],
                         'relationships' => [
                             'events' => [
@@ -81,14 +112,14 @@ class UserControllerTest extends TestCase
                         ]
                     ],
                     [
-                        'id' => 3,
+                        'id' => 1,
                         'attributes' => [
-                            'first_name' => 'Alice',
-                            'last_name' => 'Petit',
+                            'first_name' => 'Lea',
+                            'last_name' => 'Dubois',
                             'role' => 'user',
                         ],
                         'links' => [
-                            'self' => 'http://localhost/api/users/3',
+                            'self' => 'http://localhost/api/users/1',
                         ],
                         'relationships' => [
                             'events' => [

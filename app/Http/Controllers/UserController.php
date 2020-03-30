@@ -35,9 +35,15 @@ class UserController extends Controller
     {
         $user = Auth::guard('api')->user();
 
-        $users = User::select('id', 'first_name', 'last_name', 'role')
-            ->where('id', '!=', $user->id)
-            ->get();
+        if ($user->isAdmin()) {
+            $users = User::notAdmin()
+                ->where('id', '!=', $user->id)
+                ->get();
+        } else {
+            $users = User::select('id', 'first_name', 'last_name', 'role')
+                ->where('role', 'admin')
+                ->get();
+        }
 
         return new UserCollection($users);
     }

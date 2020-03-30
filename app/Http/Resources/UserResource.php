@@ -33,6 +33,9 @@ class UserResource extends JsonResource
                 'job' => $this->when(isset($this->job), function () {
                     return $this->job;
                 }),
+                'messages_not_read' => $this->when(isset($this->messages_count), function () {
+                    return $this->messages_count;
+                }),
                 'last_name' => $this->when(isset($this->last_name), function () {
                     return $this->last_name;
                 }),
