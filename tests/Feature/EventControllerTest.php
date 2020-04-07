@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Address;
 use App\Event;
+use App\Ticket;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -67,6 +68,24 @@ class EventControllerTest extends TestCase
             'title' => 'LES ELUCUBRATIONS',
         ]);
 
+        $ticket = factory(Ticket::class)->create([
+            'description' => 'Des informations utile.',
+            'event_id' => $event->id,
+            'price' => 2000,
+            'tickets_number' => 3000,
+            'tickets_remain' => 3000,
+            'type' => 'Block A'
+        ]);
+
+        $ticketTwo = factory(Ticket::class)->create([
+            'description' => 'Des informations utile.',
+            'event_id' => $event->id,
+            'price' => 1500,
+            'tickets_number' => 1000,
+            'tickets_remain' => 1000,
+            'type' => 'Block C'
+        ]);
+
         $event->address()->associate($address)->save();
 
         // Action
@@ -94,6 +113,27 @@ class EventControllerTest extends TestCase
                             ],
                             'end_date' => '21/12/2021',
                             'event_program' => ['Des informations utile.', 'Des informations utile.'],
+                            'event_tickets' => [
+                                'total_number_of_tickets' => 4000,
+                                'number_of_tickets_remaining' => 4000,
+                                'format_price_to_display' => 'A Partir de 15.00 €',
+                                'tickets' => [
+                                    [
+                                        'description' => 'Des informations utile.',
+                                        'price' => 2000,
+                                        'tickets_number' => 3000,
+                                        'tickets_remain' => 3000,
+                                        'type' => 'Block A'
+                                    ],
+                                    [
+                                        'description' => 'Des informations utile.',
+                                        'price' => 1500,
+                                        'tickets_number' => 1000,
+                                        'tickets_remain' => 1000,
+                                        'type' => 'Block C'
+                                    ]
+                                ]
+                            ],
                             'is_active' => false,
                             'picture' => 'http://lorempixel.com/640/480/',
                             'publish_at' => '20/12/2021',
@@ -110,6 +150,18 @@ class EventControllerTest extends TestCase
                                 'data' => [
                                     'type' => 'addresses',
                                     'id' => $address->id
+                                ]
+                            ],
+                            'tickets' => [
+                                'data' => [
+                                    [
+                                        'type' => 'tickets',
+                                        'id' => $ticket->id
+                                    ],
+                                    [
+                                        'type' => 'tickets',
+                                        'id' => $ticketTwo->id
+                                    ]
                                 ]
                             ],
                             'user' => [

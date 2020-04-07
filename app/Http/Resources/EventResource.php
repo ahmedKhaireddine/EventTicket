@@ -32,6 +32,20 @@ class EventResource extends JsonResource
                 'event_program' => $this->when(isset($this->event_program), function () {
                     return $this->event_program;
                 }),
+                $this->mergeWhen($this->tickets()->exists(), function () {
+                    return [
+                        'event_tickets' => [
+                            'total_number_of_tickets' => $this->total_tickets_number,
+                            'number_of_tickets_remaining' => $this->total_tickets_remaining,
+                            'format_price_to_display' => $this->formatted_price,
+                            'tickets' => $this->tickets->map(function ($ticket) {
+                                return $ticket->makeHidden([
+                                    'created_at', 'deleted_at', 'event_id', 'id', 'updated_at'
+                                ])->toArray();
+                            })
+                        ],
+                    ];
+                }),
                 'is_active' => $this->is_active,
                 'picture' => $this->picture,
                 'publish_at' => $this->formatted_publish_at,
@@ -53,6 +67,15 @@ class EventResource extends JsonResource
                         'type' => 'addresses',
                         'id' => $this->address->id
                     ] : null
+                ],
+                'tickets' => [
+                    'data' => $this->tickets()->exists() ?
+                    $this->tickets->map(function ($ticket) {
+                        return [
+                            'type' => 'tickets',
+                            'id' => $ticket->id
+                        ];
+                    }) : null
                 ],
                 'user' => [
                     'data' => $this->user()->exists() ? [
