@@ -123,7 +123,7 @@ class ConversationControllerTest extends TestCase
                                 'id' => $this->user->id,
                                 'full_name' => 'Lea Dubois'
                             ],
-                            'read_at' => '2020-03-30 00:00:00',
+                            'read_at' => Carbon::now()->format('Y-m-d 00:00:00'),
                             'to_user' => [
                                 'id' => $this->userAdmin->id,
                                 'full_name' => 'Martin Legrand'

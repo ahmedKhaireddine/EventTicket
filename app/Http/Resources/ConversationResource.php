@@ -22,11 +22,11 @@ class ConversationResource extends JsonResource
      */
     public function __construct($resource)
     {
+        parent::__construct($resource);
+
         $user = User::find($resource->to_id, ['id', 'first_name', 'last_name']);
 
         $this->toUser = $user ?? null;
-
-        $this->resource = $resource;
     }
 
     /**
@@ -70,5 +70,19 @@ class ConversationResource extends JsonResource
                 ]
             ]
         ];
+    }
+
+    /**
+     * Customize the response for a request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\JsonResponse  $response
+     * @return void
+     */
+    public function withResponse($request, $response)
+    {
+        if ($request->isMethod('post')) {
+            $response->setStatusCode(201);
+        }
     }
 }
