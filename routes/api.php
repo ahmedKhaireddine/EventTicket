@@ -21,6 +21,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('addresses', AddressController::class)->only(['show', 'store', 'update']);
     Route::apiResource('conversations', ConversationController::class)->only(['index', 'store']);
     Route::apiResource('events', EventController::class)->only(['store', 'update']);
+    Route::apiResource('tickets', TicketController::class)->only(['store', 'show', 'update', 'destroy']);
     Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
 });
 
