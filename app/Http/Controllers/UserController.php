@@ -29,7 +29,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Resources\UserCollection
      */
     public function index()
     {
@@ -51,8 +51,8 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  \App\Http\Requests\UserStoreRequest  $request
+     * @return \App\Http\Resources\UserResource
      */
     public function store(UserStoreRequest $request)
     {
@@ -72,8 +72,8 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  \App\User  $user
+     * @return \App\Http\Resources\UserResource
      */
     public function show(User $user)
     {
@@ -83,9 +83,9 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  \App\Http\Requests\UserUpdateRequest  $request
+     * @param  \App\User  $user
+     * @return \App\Http\Resources\UserResource
      */
     public function update(UserUpdateRequest $request, User $user)
     {
@@ -98,7 +98,7 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)

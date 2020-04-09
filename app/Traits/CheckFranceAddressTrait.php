@@ -4,6 +4,12 @@ namespace App\Traits;
 
 trait CheckFranceAddressTrait
 {
+    /**
+     * Check the address exists in French.
+     *
+     * @param  array  $attributes
+     * @return bool
+     */
     public function checkAddress(array $attributes)
     {
         if (isset($attributes['street_address'], $attributes['postal_code'])) {

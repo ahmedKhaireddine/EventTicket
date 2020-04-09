@@ -35,8 +35,8 @@ class TicketController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  App\Ticket $ticket
-     * @return App\Http\Resources\TicketResource
+     * @param  \App\Ticket $ticket
+     * @return \App\Http\Resources\TicketResource
      */
     public function show(Ticket $ticket)
     {
@@ -46,9 +46,9 @@ class TicketController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  App\Http\Requests\TicketUpdateRequest  $request
-     * @param  App\Ticket  $ticket
-     * @return App\Http\Resources\TicketResource
+     * @param  \App\Http\Requests\TicketUpdateRequest  $request
+     * @param  \App\Ticket  $ticket
+     * @return \App\Http\Resources\TicketResource
      */
     public function update(TicketUpdateRequest $request, Ticket $ticket)
     {
@@ -74,7 +74,7 @@ class TicketController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  App\Ticket  $ticket
+     * @param  \App\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function destroy(Ticket $ticket)

@@ -18,7 +18,7 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Resources\EventCollection
      */
     public function index()
     {
@@ -30,8 +30,8 @@ class EventController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  \App\Http\Requests\EventStoreRequest  $request
+     * @return \App\Http\Resources\EventResource
      */
     public function store(EventStoreRequest $request)
     {
@@ -56,8 +56,8 @@ class EventController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  App\Event  $event
-     * @return \Illuminate\Http\Response
+     * @param  \App\Event  $event
+     * @return \App\Http\Resources\EventResource
      */
     public function show(Event $event)
     {
@@ -67,9 +67,9 @@ class EventController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  App\Http\Requests\EventUpdateRequest  $request
-     * @param  App\Event  $event
-     * @return \Illuminate\Http\Response
+     * @param  \App\Http\Requests\EventUpdateRequest  $request
+     * @param  \App\Event  $event
+     * @return \App\Http\Resources\EventResource
      */
     public function update(EventUpdateRequest $request, Event $event)
     {
@@ -107,11 +107,11 @@ class EventController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Event  $event
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Event $event)
     {
-        //
+        abort(405);
     }
 }

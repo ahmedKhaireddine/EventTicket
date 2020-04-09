@@ -18,6 +18,8 @@ class AddressResource extends JsonResource
             'type' => 'addresses',
             'id' => $this->id,
             'attributes' => [
+                'created_at' => $this->created_at->toDateTimeString(),
+                'updated_at' => $this->updated_at->toDateTimeString(),
                 'additionel_information' => $this->when(isset($this->additionel_information), function () {
                     return $this->additionel_information;
                 }),

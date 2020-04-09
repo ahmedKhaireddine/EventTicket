@@ -58,7 +58,7 @@ class ConversationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\ConversationStoreRequest  $request
+     * @param  \App\Http\Requests\ConversationStoreRequest  $request
      * @return \App\Http\Resources\ConversationResource
      */
     public function store(ConversationStoreRequest $request)

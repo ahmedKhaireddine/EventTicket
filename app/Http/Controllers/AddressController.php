@@ -17,8 +17,8 @@ class AddressController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\AddressStoreRequest  $request
-     * @return \Illuminate\Http\Response
+     * @param  \App\Http\Requests\AddressStoreRequest  $request
+     * @return \App\Http\Resources\AddressResource
      */
     public function store(AddressStoreRequest $request)
     {
@@ -44,9 +44,9 @@ class AddressController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  App\Http\Requests\AddressUpdateRequest  $request
-     * @param  App\Address  $address
-     * @return \Illuminate\Http\Response
+     * @param  \App\Http\Requests\AddressUpdateRequest  $request
+     * @param  \App\Address  $address
+     * @return \App\Http\Resources\AddressResource
      */
     public function update(AddressUpdateRequest $request, Address $address)
     {
@@ -79,6 +79,6 @@ class AddressController extends Controller
      */
     public function destroy($id)
     {
-        //
+        abort(405);
     }
 }

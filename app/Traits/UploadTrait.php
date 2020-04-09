@@ -7,6 +7,15 @@ use Illuminate\Support\Facades\Storage;
 
 trait UploadTrait
 {
+    /**
+     * Upload image.
+     *
+     * @param  object  $uploadeFile
+     * @param  string  $folder
+     * @param  string  $disk
+     * @param  string  $filename
+     * @return string
+     */
     public function uploadOne($uploadeFile, string $folder, string $disk = 'public', string $filename = null)
     {
         $name = isset($filename) ? str_replace(' ', '_', $filename).'_'.time() : str_random(25).'_'.time();
