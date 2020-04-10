@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -19,22 +21,31 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
-
     /**
-     * Where to redirect users after login.
+     * Login.
      *
-     * @var string
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    public function login(Request $request) {
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
+        $dataLogin = $this->validate($request, [
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($dataLogin)) {
+            $user = Auth::user()->createToken(env('APP_NAME',  'Laravel'));
+
+            return response()->json([
+                'success' => [
+                    'token' => $user->accessToken
+                ]
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Unauthorised'
+            ], 401);
+        }
     }
 }

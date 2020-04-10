@@ -13,11 +13,19 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('login', 'Auth\LoginController@login')->name('login');
 
 Route::middleware('auth:api')->group(function () {
+
+    Route::post('signout', function (Request $request) {
+        $request->user()->token()->revoke();
+        return response()->json([], 204);
+    });
+
+    Route::get('user', function (Request $request) {
+        return new App\Http\Resources\UserResource($request->user());
+    });
+
     Route::apiResource('addresses', AddressController::class)->only(['show', 'store', 'update']);
     Route::apiResource('conversations', ConversationController::class)->only(['index', 'store']);
     Route::apiResource('events', EventController::class)->only(['store', 'update']);
