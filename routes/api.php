@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
+Auth::routes(['verify' => true]);
+
 Route::post('login', 'Auth\LoginController@login')->name('login');
 
 Route::middleware('auth:api')->group(function () {

@@ -7,6 +7,27 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class UserResource extends JsonResource
 {
     /**
+     * The access token of user model.
+     *
+     * @var string
+     */
+    protected $accessToken;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @param  App\User  $resource
+     * @param  string  $accessToken
+     * @return void
+     */
+    public function __construct($resource, $accessToken = null)
+    {
+        parent::__construct($resource);
+
+        $this->accessToken = $accessToken;
+    }
+
+    /**
      * Transform the resource into an array.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -23,6 +44,9 @@ class UserResource extends JsonResource
                 }),
                 'updated_at' => $this->when(isset($this->updated_at), function () {
                     return $this->updated_at->toDateTimeString();
+                }),
+                'access_token' => $this->when(isset($this->accessToken), function () {
+                    return $this->accessToken;
                 }),
                 'email_address' => $this->when(isset($this->email), function () {
                     return $this->email;

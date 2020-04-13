@@ -66,7 +66,9 @@ class UserController extends Controller
         $user->role = 'user';
         $user->save();
 
-        return new UserResource($user);
+        $accessToken = $user->createToken(env('APP_NAME',  'Laravel'))->accessToken;
+
+        return new UserResource($user, $accessToken);
     }
 
     /**
@@ -90,6 +92,7 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, User $user)
     {
         $user->fill($request->validated());
+
         $user->save();
 
         return new UserResource($user);

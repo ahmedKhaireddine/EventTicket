@@ -18,6 +18,8 @@ class UserControllerTest extends TestCase
     {
         parent::setUp();
 
+        \Artisan::call('passport:install',['-vvv' => true]);
+
         $this->user = factory(User::class)->create([
             'first_name' => 'Lea',
             'last_name' => 'Dubois',
@@ -284,7 +286,6 @@ class UserControllerTest extends TestCase
 
     public function test_can_store_user_when_we_provide_a_field_email_exists_return_Http_code_422()
     {
-        // Arrange
         // Arrange
         $user = factory(User::class)->create([
             'email' => 'robert_legrand@yahoo.fr'
