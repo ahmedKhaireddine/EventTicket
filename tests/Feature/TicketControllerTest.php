@@ -20,6 +20,10 @@ class TicketControllerTest extends TestCase
 
         $this->user = factory(User::class)->create();
 
+        $this->userNotVerified = factory(User::class)->create([
+            'email_verified_at' => null
+        ]);
+
         $this->event = factory(Event::class)->create();
 
         $this->ticket = factory(Ticket::class)->create([
@@ -43,6 +47,16 @@ class TicketControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(401);
+    }
+
+    public function test_can_show_ticket_when_user_is_connected_but_his_email_is_not_verified_return_Http_code_403()
+    {
+        // Action
+        $response = $this->actingAs($this->userNotVerified, 'api')->json('GET', route('tickets.show', $this->ticket));
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeText('Your email address is not verified.');
     }
 
     public function test_can_show_ticket_when_ticket_dont_exists_return_Http_code_404()
@@ -107,6 +121,27 @@ class TicketControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(401);
+    }
+
+    public function test_can_store_ticket_when_user_is_connected_but_his_email_is_not_verified_return_Http_code_403()
+    {
+        // Arrange
+        $data = [
+            'event_id' => $this->event->id,
+            'ticket' => [
+                'number' => 50000,
+                'type' => 'Block B',
+                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
+                'price' => 2000,
+            ],
+        ];
+
+        // Action
+        $response = $this->actingAs($this->userNotVerified, 'api')->json('POST', route('tickets.store'), $data);
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeText('Your email address is not verified.');
     }
 
     public function test_can_store_ticket_when_we_dont_provided_event_id_return_Http_code_422()
@@ -207,6 +242,28 @@ class TicketControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(401);
+    }
+
+    public function test_can_update_ticket_when_user_is_connected_but_his_email_is_not_verified_return_Http_code_403()
+    {
+        // Arrange
+        $data = [
+            'event_id' => $this->event->id,
+            'ticket' => [
+                'number' => 60000,
+                'type' => 'Block U',
+                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
+                'price' => 3000,
+            ],
+            'ticket_id' => $this->ticket->id
+        ];
+
+        // Action
+        $response = $this->actingAs($this->userNotVerified, 'api')->json('PUT', route('tickets.update', $this->ticket->id), $data);
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeText('Your email address is not verified.');
     }
 
     public function test_can_update_ticket_when_ticket_dont_exists_return_Http_code_404()

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class AddressControllerTest extends TestCase
@@ -20,6 +21,10 @@ class AddressControllerTest extends TestCase
         parent::setUp();
 
         $this->user = factory(User::class)->create();
+
+        $this->userNotVerified = factory(User::class)->create([
+            'email_verified_at' => null
+        ]);
 
         $this->event = factory(Event::class)->create();
     }
@@ -36,6 +41,29 @@ class AddressControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(401);
+    }
+
+    public function test_can_store_address_when_user_is_connected_but_his_email_not_verified_return_Http_code_403()
+    {
+        // Arrange
+        $data = [
+            'address' => [
+                'additionel_information' => 'Suite 063',
+                'city' => 'Lake Vedaland',
+                'country' => 'Benin',
+                'postal_code' => '29294',
+                'street_address' => '15654 Caitlyn Mall',
+                'venue' => 'Maggio LLC'
+            ],
+            'event_id' => $this->event->id
+        ];
+
+        // Action
+        $response = $this->actingAs($this->userNotVerified, 'api')->json('POST', route('addresses.store'), $data);
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeText('Your email address is not verified.');
     }
 
     public function test_can_store_address_when_user_is_connected_address_is_not_in_france_return_Http_code_201()
@@ -210,6 +238,30 @@ class AddressControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(401);
+    }
+
+    public function test_can_update_address_when_user_is_not_connected_but_his_email_is_not_verified_return_Http_code_403()
+    {
+        // Arrange
+        $address = factory(Address::class)->create();
+
+        $this->event->address()->associate($address)->save();
+
+        $data = [
+            'address' => factory(Address::class)
+                ->make()
+                ->makeHidden(['full_address'])
+                ->toArray(),
+            'address_id' => $address->id,
+            'event_id' => $this->event->id,
+        ];
+
+        // Action
+        $response = $this->actingAs($this->userNotVerified, 'api')->json('PUT', route('addresses.update', $address->id), $data);
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeText('Your email address is not verified.');
     }
 
     public function test_can_update_address_when_we_do_not_provide_the_id_parameters_to_the_url_return_exeption()

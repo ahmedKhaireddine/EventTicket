@@ -28,10 +28,10 @@ Route::middleware('auth:api')->group(function () {
         return new App\Http\Resources\UserResource($request->user());
     });
 
-    Route::apiResource('addresses', AddressController::class)->only(['show', 'store', 'update']);
+    Route::apiResource('addresses', AddressController::class)->only(['show', 'store', 'update'])->middleware('verified');
     Route::apiResource('conversations', ConversationController::class)->only(['index', 'store']);
-    Route::apiResource('events', EventController::class)->only(['store', 'update']);
-    Route::apiResource('tickets', TicketController::class)->only(['store', 'show', 'update', 'destroy']);
+    Route::apiResource('events', EventController::class)->only(['store', 'update'])->middleware('verified');
+    Route::apiResource('tickets', TicketController::class)->only(['store', 'show', 'update', 'destroy'])->middleware('verified');
     Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
 });
 

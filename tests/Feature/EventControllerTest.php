@@ -25,6 +25,10 @@ class EventControllerTest extends TestCase
         $this->fakeEventId = Event::all()->count() + 1;
 
         $this->user = factory(User::class)->create();
+
+        $this->userNotVerified = factory(User::class)->create([
+            'email_verified_at' => null
+        ]);
     }
 
     // Index
@@ -254,6 +258,19 @@ class EventControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
+    public function test_can_store_event_when_user_is_connected_but_his_email_is_not_verified_Http_code_403()
+    {
+        // Arrange
+        $data = factory(Event::class)->make()->toArray();
+
+        // Action
+        $response = $this->actingAs($this->userNotVerified, 'api')->json('POST', route('events.store'), $data);
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeText('Your email address is not verified.');
+    }
+
     public function test_can_store_event_when_user_is_connected_return_Http_code_200()
     {
         // Arrange
@@ -354,6 +371,31 @@ class EventControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(401);
+    }
+
+    public function test_can_update_event_when_user_is_connected_but_his_email_is_not_verified_Http_code_403()
+    {
+        // Arrange
+        $event = factory(Event::class)->create();
+
+        $data = [
+            'additionel_information' => 'Des informations utile.',
+            'end_date' => '2021-12-21',
+            'event_program' => ['Des informations utile.', 'Des informations utile.'],
+            'picture' => UploadedFile::fake()->image('avatar.jpg'),
+            'publish_at' => '2021-12-20',
+            'start_date' => '2021-12-20',
+            'start_time' => '12:00',
+            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+            'title' => 'LES ELUCUBRATIONS',
+        ];
+
+        // Action
+        $response = $this->actingAs($this->userNotVerified, 'api')->json('PUT', route('events.update', $event->id), $data);
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeText('Your email address is not verified.');
     }
 
     public function test_can_update_event_when_event_dont_exists_return_Http_code_404()
