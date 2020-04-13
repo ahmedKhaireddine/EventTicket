@@ -24,9 +24,7 @@ class ConversationResource extends JsonResource
     {
         parent::__construct($resource);
 
-        $user = User::find($resource->to_id, ['id', 'first_name', 'last_name']);
-
-        $this->toUser = $user ?? null;
+        $this->toUser = User::find($resource->to_id, ['id', 'first_name', 'last_name']);
     }
 
     /**
