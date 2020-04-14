@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
+use App\Http\Resources\UserResource;
 use App\User;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -22,52 +21,57 @@ class RegisterController extends Controller
     |
     */
 
-    use RegistersUsers;
-
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = RouteServiceProvider::HOME;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('guest');
-    }
-
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array  $data
+     * @param  array  $attributes
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    protected function validator(array $data)
+    protected function validator(array $attributes)
     {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+        return Validator::make($attributes, [
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'job' => ['required', 'string'],
+            'last_name' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['required', 'string'],
         ]);
     }
 
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array  $data
+     * @param  array  $attributes
      * @return \App\User
      */
-    protected function create(array $data)
+    protected function create(array $attributes)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        $user = new User();
+        $user->email = $attributes['email'];
+        $user->first_name = $attributes['first_name'];
+        $user->job = $attributes['job'];
+        $user->last_name = $attributes['last_name'];
+        $user->password = $attributes['password'];
+        $user->phone = $attributes['phone'];
+        $user->role = 'admin';
+        $user->save();
+
+        return $user;
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \App\Http\Resources\UserResource
+     */
+    public function register(Request $request)
+    {
+        $attributes = $this->validator($request->all())->validate();
+
+        $user = $this->create($attributes);
+
+        return new UserResource($user);
     }
 }

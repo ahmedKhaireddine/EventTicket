@@ -32,5 +32,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('to-speak', function ($user, $user_id) {
             return $user->id != $user_id;
         });
+
+        Gate::define('create-admin', function ($user) {
+            return $user->is_super_admin == true;
+        });
     }
 }

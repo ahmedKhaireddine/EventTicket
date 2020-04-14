@@ -19,6 +19,8 @@ Route::post('login', 'Auth\LoginController@login')->name('login');
 
 Route::middleware('auth:api')->group(function () {
 
+    Route::post('create', 'Auth\RegisterController@register')->name('admin.create')->middleware('can:create-admin,App\User');
+
     Route::post('signout', function (Request $request) {
         $request->user()->token()->revoke();
         return response()->json([], 204);
