@@ -24,11 +24,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('signout', function (Request $request) {
         $request->user()->token()->revoke();
         return response()->json([], 204);
-    });
+    })->name('signout');
 
     Route::get('user', function (Request $request) {
         return new App\Http\Resources\UserResource($request->user());
-    });
+    })->name('user');
 
     Route::apiResource('addresses', AddressController::class)->only(['show', 'store', 'update'])->middleware('verified');
     Route::apiResource('conversations', ConversationController::class)->only(['index', 'store']);

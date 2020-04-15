@@ -44,7 +44,7 @@ class LoginController extends Controller
             ], 200);
         } else {
             return response()->json([
-                'message' => 'Unauthorised'
+                'message' => 'Invalid credentials.'
             ], 401);
         }
     }
