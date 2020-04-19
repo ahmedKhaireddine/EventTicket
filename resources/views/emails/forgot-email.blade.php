@@ -42,9 +42,9 @@
 
         .bloc{
             margin: 0 auto;
-            width: 300px;
-            margin-bottom: 20px;
-            overflow: hidden;
+            width: 500px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
         }
 
         .main{
@@ -52,8 +52,8 @@
         }
 
         button{
-            background-color: #1ac8aa !important;
-            border-color: #1ac8aa !important;
+            background-color: #42b5ba !important;
+            border-color: #42b5ba !important;
             color: white;
             padding: 10px;
             border-radius: 3px;
@@ -79,14 +79,14 @@
         <div class="content">
 
             <div class="logo">
-                <img src = "logo.png" />
+                <img src = "{{asset('/logo.png')}}" />
             </div>
 
             <h1> {{ $title }} </h1>
 
             <div class="bloc main">
                 <h3> {{ $greeting }} </h3>
-                <p> {{ $description_line }} </p>
+                <p> {{ $description }} </p>
             </div>
 
             <div class="bloc" style="margin-top:20px">
@@ -99,11 +99,10 @@
 
             <div class="bloc">
                 <p> {{ $additional_information }} </p>
-                </br>
                 <p>
                     {{ $ending_sentence }}
                     </br>
-                    {{ $team_sentance }}
+                    {{ $team }}
                 </p>
             </div>
         </div>

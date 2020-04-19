@@ -51,19 +51,21 @@ class PasswordResetNotification extends Notification
         // Lien vers la page qui contient le formulaire de réinitialisation de mot de passe
         $url = "http://127.0.0.1:8000/{$this->token}";
 
-        return (new MailMessage)->view(
-            'emails.forgot-email',
-            [
-                'button_sentence' => trans('reset-password.button_sentence'),
-                'greeting' => trans('reset-password.greeting'),
-                'description_line' => trans('reset-password.description_line'),
-                'additional_information' => trans('reset-password.additional_information'),
-                'ending_sentence' => trans('reset-password.ending_sentence'),
-                'team_sentance' => trans('reset-password.team_sentance'),
-                'title' => trans('reset-password.title'),
-                'url' => $url,
-            ]
-        );
+        return (new MailMessage)
+            ->subject(trans('reset-password.subject'))
+            ->view(
+                'emails.forgot-email',
+                [
+                    'button_sentence' => trans('reset-password.button'),
+                    'greeting' => trans('reset-password.greeting'),
+                    'description' => trans('reset-password.description'),
+                    'additional_information' => trans('reset-password.additional_information'),
+                    'ending_sentence' => trans('reset-password.end'),
+                    'team' => trans('reset-password.team'),
+                    'title' => trans('reset-password.title'),
+                    'url' => $url,
+                ]
+            );
     }
 
     /**
