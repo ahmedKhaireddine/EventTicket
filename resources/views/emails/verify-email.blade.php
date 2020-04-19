@@ -34,7 +34,8 @@
         .logo{
             width: 180px;
             margin: 30px auto;
-            }
+        }
+
         .logo img{
             width: 100%;
             height: auto;

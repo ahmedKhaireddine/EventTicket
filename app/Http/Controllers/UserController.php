@@ -6,9 +6,11 @@ use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
+use App\Mail\WelcomeMailable;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -65,6 +67,8 @@ class UserController extends Controller
         $user->phone = $request->phone;
         $user->role = 'user';
         $user->save();
+
+        Mail::to($user->email)->send(new WelcomeMailable($user->first_name));
 
         $accessToken = $user->createToken(env('APP_NAME',  'Laravel'))->accessToken;
 
