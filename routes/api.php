@@ -38,4 +38,6 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::apiResource('events', EventController::class)->only(['index', 'show']);
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
+Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 Route::apiResource('users', UserController::class)->only(['store']);
