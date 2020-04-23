@@ -51,7 +51,7 @@ class TicketUpdateRequest extends FormRequest
 
                 if ($ticket->event()->exists()) {
                     if ($ticket->event->id != $event->id) {
-                        $validator->errors()->add('field', 'The ticket is not related to the event provided.');
+                        $validator->errors()->add('field', trans('The ticket is not related to the event provided.'));
                     }
                 }
             }

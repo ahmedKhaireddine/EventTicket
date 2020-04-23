@@ -55,7 +55,7 @@ class TicketController extends Controller
         $attributes = $request->validated();
 
         if ($attributes['ticket_id'] != $ticket->id) {
-            abort(500, 'The ticket identifier passed in the request parameter does not match with ticket to retrieve.');
+            abort(500, trans('The ticket identifier passed in the request parameter does not match with ticket retrieved.'));
         }
 
         if (isset($attributes['ticket']['number'])) {

@@ -51,7 +51,7 @@ class AddressUpdateRequest extends FormRequest
 
                 if ($event->address()->exists()) {
                     if ($event->address->id != $this->address_id) {
-                        $validator->errors()->add('field', 'The address is not related to the event provided.');
+                        $validator->errors()->add('field', trans('The address is not related to the event provided.'));
                     }
                 }
             }

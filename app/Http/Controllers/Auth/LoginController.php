@@ -44,7 +44,7 @@ class LoginController extends Controller
             ], 200);
         } else {
             return response()->json([
-                'message' => 'Invalid credentials.'
+                'message' => trans('Invalid credentials.')
             ], 401);
         }
     }

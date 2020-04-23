@@ -30,7 +30,7 @@ class AddressController extends Controller
             if ($this->checkAddress($attributes['address'])) {
                 $address = Address::create($attributes['address']);
             } else {
-                abort(500, 'The address does not exist in France.');
+                abort(500, trans('The address does not exist in France.'));
             }
         } else {
             $address = Address::create($attributes['address']);
@@ -53,14 +53,14 @@ class AddressController extends Controller
         $attributes = $request->validated();
 
         if ($attributes['address_id'] != $address->id) {
-            abort(500, 'The address identifier passed in the request parameter does not match with address to retrieve.');
+            abort(500, trans('The address identifier transmitted in the request parameter does not correspond to the address retrieved.'));
         }
 
         if ($attributes['address']['country'] === 'France') {
             if ($this->checkAddress($attributes['address'])) {
                 $address->fill($attributes['address']);
             } else {
-                abort(500, 'The address does not exist in France.');
+                abort(500, trans('The address does not exist in France.'));
             }
         } else {
             $address->fill($attributes['address']);

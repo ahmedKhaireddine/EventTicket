@@ -43,7 +43,7 @@ class ConversationStoreRequest extends FormRequest
                 $user = User::find($this->to_id);
 
                 if ($user->role == 'user' && $this->user()->role == 'user') {
-                    $validator->errors()->add('field', 'You cannot speak with this user.');
+                    $validator->errors()->add('field', trans('You cannot speak with this user.'));
                 }
             }
         });

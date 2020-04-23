@@ -52,7 +52,7 @@ class PasswordResetNotification extends Notification
         $url = "http://127.0.0.1:8000/{$this->token}";
 
         return (new MailMessage)
-            ->subject(trans('reset-password.subject'))
+            ->subject(trans('Reset Password'))
             ->view(
                 'emails.forgot-email',
                 [

@@ -35,7 +35,7 @@ class WelcomeMailable extends Mailable
      */
     public function build()
     {
-        return $this->subject(trans('welcome-email.subject'))
+        return $this->subject(trans('Welcome to Events'))
             ->view('emails.welcome')
             ->with([
                 'greeting' => trans('welcome-email.greeting') . $this->name . trans('welcome-email.text'),
