@@ -15,11 +15,11 @@ use Illuminate\Http\Request;
 
 Auth::routes(['verify' => true]);
 
-Route::post('login', 'Auth\LoginController@login')->name('login');
 
 Route::middleware('auth:api')->group(function () {
 
     Route::post('create', 'Auth\RegisterController@register')->name('admin.create')->middleware('can:create-admin,App\User');
+    Route::get('events/{event}/active', ActivateEventController::class)->name('events.active')->middleware('can:active-event,App\Event');;
 
     Route::post('signout', function (Request $request) {
         $request->user()->token()->revoke();
@@ -37,8 +37,10 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
 });
 
-Route::apiResource('events', EventController::class)->only(['index', 'show']);
-Route::get('locale/{lang}', 'LocalizationController')->where('lang', '(en|fr)?')->name('locale.update');
+Route::get('locale/{lang}', LocalizationController::class)->where('lang', '^(en|fr)?$')->name('locale.update');
+Route::post('login', 'Auth\LoginController@login')->name('login');
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+
+Route::apiResource('events', EventController::class)->only(['index', 'show']);
 Route::apiResource('users', UserController::class)->only(['store']);

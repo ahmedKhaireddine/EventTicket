@@ -12,7 +12,6 @@ return [
     'button' => 'Verify',
     'description' => 'Please check your email address to secure your account and have unlimited access to our app.',
     'end' => 'Best regards',
-    'subject' => 'Verify Email Address',
     'team' => 'The Name of team',
     'title' => 'Verify your email address',
 

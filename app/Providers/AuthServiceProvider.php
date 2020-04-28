@@ -36,5 +36,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('create-admin', function ($user) {
             return $user->is_super_admin == true;
         });
+
+        Gate::define('active-event', function ($user) {
+            return $user->isAdmin() || $user->is_super_admin == true;
+        });
     }
 }
