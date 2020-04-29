@@ -18,7 +18,7 @@ class CreateEventsTable extends Migration
             $table->text('additionel_information')->nullable();
             $table->date('start_date');
             $table->boolean('is_active')->default(0);
-            $table->date('publish_at')->nullable();
+            $table->date('publish_at');
             $table->string('picture')->nullable();
             $table->json('event_program')->nullable();
             $table->string('subtitle');

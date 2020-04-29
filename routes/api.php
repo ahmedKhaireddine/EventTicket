@@ -15,11 +15,15 @@ use Illuminate\Http\Request;
 
 Auth::routes(['verify' => true]);
 
-
 Route::middleware('auth:api')->group(function () {
+    Route::get('events/{event}/active', ActivateEventController::class)
+        ->where('event', '^[0-9]+$')->name('events.active')->middleware('can:active-event,App\Event');
 
-    Route::post('create', 'Auth\RegisterController@register')->name('admin.create')->middleware('can:create-admin,App\User');
-    Route::get('events/{event}/active', ActivateEventController::class)->name('events.active')->middleware('can:active-event,App\Event');;
+    Route::get('events/{event}/publish', PublishEventController::class)
+        ->where('event', '^[0-9]+$')->name('events.publish')->middleware('can:publish-event,App\Event');
+
+    Route::post('users/admin/create', 'Auth\RegisterController@register')
+        ->name('admin.create')->middleware('can:create-admin,App\User');
 
     Route::post('signout', function (Request $request) {
         $request->user()->token()->revoke();
