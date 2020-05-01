@@ -22,7 +22,6 @@ class Event extends Model
      * @var array
      */
     protected $casts = [
-        'event_program' => 'array',
         'is_active' => 'boolean',
     ];
 
@@ -145,6 +144,14 @@ class Event extends Model
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    /**
+     * Get the tickets for the event.
+     */
+    public function translations()
+    {
+        return $this->hasMany(EventTranslation::class, 'event_id');
     }
 }
 
