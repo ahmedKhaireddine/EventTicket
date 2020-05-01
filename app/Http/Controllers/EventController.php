@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\StoreEventAction;
+use App\Actions\StoreEventTranslationAction;
 use App\Event;
 use App\Http\Requests\EventStoreRequest;
 use App\Http\Requests\EventUpdateRequest;
@@ -10,6 +12,7 @@ use App\Http\Resources\EventResource;
 use App\Traits\UploadTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -35,20 +38,21 @@ class EventController extends Controller
      */
     public function store(EventStoreRequest $request)
     {
-        $event = Event::create([
-            'additionel_information' => $request->additionel_information,
-            'end_date' => Carbon::parse($request->end_date),
-            'event_program' => $request->event_program,
-            'is_active' => false,
-            'picture' => $this->uploadOne($request->picture, '/uploads/images/', 'public', $request->title),
-            'publish_at' => Carbon::parse($request->publish_at),
-            'start_date' => Carbon::parse($request->start_date),
-            'start_time' => Carbon::parse($request->start_time),
-            'subtitle' => $request->subtitle,
-            'title' => $request->title,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $event->user()->associate($request->user())->save();
+            $data = $request->validated();
+
+            $event = (new StoreEventAction)->execute($request->user(), $data['attributes']['event']);
+
+            (new StoreEventTranslationAction)->execute($event, $data['attributes']['event_translate_data']);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            throw $exception;
+        }
 
         return new EventResource($event);
     }

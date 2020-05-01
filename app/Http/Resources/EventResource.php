@@ -20,7 +20,6 @@ class EventResource extends JsonResource
             'attributes' => [
                 'created_at' => $this->created_at->toDateTimeString(),
                 'updated_at' => $this->updated_at->toDateTimeString(),
-                'additionel_information' => $this->additionel_information,
                 $this->mergeWhen($this->address()->exists(), function () {
                     return [
                         'address' => $this->address->toArray()
@@ -28,9 +27,6 @@ class EventResource extends JsonResource
                 }),
                 'end_date' => $this->when(isset($this->formatted_end_date), function () {
                     return $this->formatted_end_date;
-                }),
-                'event_program' => $this->when(isset($this->event_program), function () {
-                    return $this->event_program;
                 }),
                 $this->mergeWhen($this->tickets()->exists(), function () {
                     return [
@@ -46,6 +42,15 @@ class EventResource extends JsonResource
                         ],
                     ];
                 }),
+                $this->mergeWhen($this->translations()->exists(), function () {
+                    return [
+                        'event_translations' => $this->translations->map(function ($translation) {
+                            return $translation->makeHidden([
+                                'created_at', 'deleted_at', 'event_id', 'id', 'updated_at'
+                            ])->toArray();
+                        }),
+                    ];
+                }),
                 'is_active' => $this->is_active,
                 'picture' => $this->picture,
                 'publish_at' => $this->formatted_publish_at,
@@ -53,8 +58,6 @@ class EventResource extends JsonResource
                 'start_time' => $this->when(isset($this->formatted_start_time), function () {
                     return $this->formatted_start_time;
                 }),
-                'subtitle' => $this->subtitle,
-                'title' => $this->title,
             ],
             'links' => [
                 'self' => route('events.show', [
