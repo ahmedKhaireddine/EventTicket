@@ -23,13 +23,13 @@ class StoreEventTranslationAction
         $translations = $event->translations;
 
         if ($translations->where('locale', 'en')->isEmpty()) {
-            $attributes = $this->translateIntoAnotherLanguage('fr', 'en', $attributes);
+            $attributes = $this->translateIntoAnotherLanguage($attributes['locale'], 'en', $attributes);
 
             $event->translations()->create($attributes);
         }
 
         if ($translations->where('locale', 'fr')->isEmpty()) {
-            $attributes = $this->translateIntoAnotherLanguage('en', 'fr', $attributes);
+            $attributes = $this->translateIntoAnotherLanguage($attributes['locale'], 'fr', $attributes);
 
             $event->translations()->create($attributes);
         }
