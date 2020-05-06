@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Address;
 use App\Event;
+use App\EventTranslation;
 use App\Ticket;
 use App\User;
 use Carbon\Carbon;
@@ -12,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
+use Illuminate\Support\Facades\App;
 use Tests\TestCase;
 
 class EventControllerTest extends TestCase
@@ -47,7 +49,7 @@ class EventControllerTest extends TestCase
             ->assertJsonCount(4, 'data');
     }
 
-    public function test_can_get_all_list_of_event_with_a_complete_json_response_return_http_code_200()
+    public function test_can_get_all_list_of_event_with_a_complete_json_response_and_locale_en_return_http_code_200_with_english_translation()
     {
         // Arrange
         $address = factory(Address::class)->create([
@@ -60,16 +62,29 @@ class EventControllerTest extends TestCase
         ]);
 
         $event = factory(Event::class)->create([
-            'additionel_information' => 'Des informations utile.',
             'end_date' => '2021-12-21',
-            'event_program' => ['Des informations utile.', 'Des informations utile.'],
             'is_active' => false,
             'picture' => 'http://lorempixel.com/640/480/',
-            'publish_at' => '2021-12-20',
             'start_date' => '2021-12-20',
             'start_time' => '12:00',
+        ]);
+
+        $frenshTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+            'event_id' => $event->id,
+            'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
+            'locale' => 'fr',
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'LES ELUCUBRATIONS',
+        ]);
+
+        $englishTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+            'event_id' => $event->id,
+            'event_program' => ['I\'m sorry, I forgot my homework.', 'I was away last week.'],
+            'locale' => 'en',
+            'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+            'title' => 'THE ELUCUBRATIONS'
         ]);
 
         $ticket = factory(Ticket::class)->create([
@@ -105,7 +120,6 @@ class EventControllerTest extends TestCase
                         'type' => 'events',
                         'id' => 1,
                         'attributes' => [
-                            'additionel_information' => 'Des informations utile.',
                             'address' => [
                                 'additionel_information' => 'Suite 584',
                                 'city' => 'Port Bobbyfurt',
@@ -116,7 +130,6 @@ class EventControllerTest extends TestCase
                                 'full_address' => '2316 Clemmie Throughway, 95929-9607 Port Bobbyfurt',
                             ],
                             'end_date' => '21/12/2021',
-                            'event_program' => ['Des informations utile.', 'Des informations utile.'],
                             'event_tickets' => [
                                 'total_number_of_tickets' => 4000,
                                 'number_of_tickets_remaining' => 4000,
@@ -138,13 +151,22 @@ class EventControllerTest extends TestCase
                                     ]
                                 ]
                             ],
+                            'event_translations' => [
+                                [
+                                    'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+                                    'event_program' => [
+                                        'I\'m sorry, I forgot my homework.',
+                                        'I was away last week.'
+                                    ],
+                                    'locale' => 'en',
+                                    'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+                                    'title' => 'THE ELUCUBRATIONS'
+                                ]
+                            ],
                             'is_active' => false,
                             'picture' => 'http://lorempixel.com/640/480/',
-                            'publish_at' => '20/12/2021',
                             'start_date' => '20/12/2021',
                             'start_time' => '12:00',
-                            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-                            'title' => 'LES ELUCUBRATIONS',
                         ],
                         'links' => [
                             'self' => 'http://localhost/api/events/1',
@@ -197,18 +219,32 @@ class EventControllerTest extends TestCase
         $response->assertNotFound();
     }
 
-    public function test_can_show_event_return_Http_code_200()
+    public function test_can_show_event_when_locale_en_return_Http_code_200_with_english_translation()
     {
         // Arrange
         $event = factory(Event::class)->create([
-            'additionel_information' => 'Des informations utile.',
             'start_date' => '2021-12-20',
-            'is_active' => false,
             'picture' => 'http://lorempixel.com/640/480/',
-            'publish_at' => '2021-12-20',
+        ]);
+
+        $frenshTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+            'event_id' => $event->id,
+            'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
+            'locale' => 'fr',
             'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
             'title' => 'LES ELUCUBRATIONS',
         ]);
+
+        $englishTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+            'event_id' => $event->id,
+            'event_program' => ['I\'m sorry, I forgot my homework.', 'I was away last week.'],
+            'locale' => 'en',
+            'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+            'title' => 'THE ELUCUBRATIONS'
+        ]);
+
 
         // Action
         $response = $this->json('GET', route('events.show', $event->id));
@@ -221,13 +257,170 @@ class EventControllerTest extends TestCase
                     'type' => 'events',
                     'id' => 1,
                     'attributes' => [
-                        'additionel_information' => 'Des informations utile.',
+                        'event_translations' => [
+                            [
+                                'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+                                'event_program' => [
+                                    'I\'m sorry, I forgot my homework.',
+                                    'I was away last week.'
+                                ],
+                                'locale' => 'en',
+                                'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+                                'title' => 'THE ELUCUBRATIONS'
+                            ],
+                        ],
                         'is_active' => false,
                         'picture' => 'http://lorempixel.com/640/480/',
-                        'publish_at' => '20/12/2021',
                         'start_date' => '20/12/2021',
-                        'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-                        'title' => 'LES ELUCUBRATIONS',
+                    ],
+                    'links' => [
+                        'self' => 'http://localhost/api/events/1',
+                    ],
+                    'relationships' => [
+                        'address' => [
+                            'data' => null
+                        ],
+                        'user' => [
+                            'data' => null
+                        ]
+                    ]
+                ]
+            ]);
+    }
+    public function test_can_show_event_when_locale_fr_return_Http_code_200_with_frensh_translation()
+    {
+        // Arrange
+        App::setLocale('fr');
+
+        $event = factory(Event::class)->create([
+            'start_date' => '2021-12-20',
+            'picture' => 'http://lorempixel.com/640/480/',
+        ]);
+
+        $frenshTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+            'event_id' => $event->id,
+            'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
+            'locale' => 'fr',
+            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+            'title' => 'LES ELUCUBRATIONS',
+        ]);
+
+        $englishTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+            'event_id' => $event->id,
+            'event_program' => ['I\'m sorry, I forgot my homework.', 'I was away last week.'],
+            'locale' => 'en',
+            'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+            'title' => 'THE ELUCUBRATIONS'
+        ]);
+
+
+        // Action
+        $response = $this->json('GET', route('events.show', $event->id));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertJson([
+                'data' => [
+                    'type' => 'events',
+                    'id' => 1,
+                    'attributes' => [
+                        'event_translations' => [
+                            [
+                                'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+                                'event_program' => [
+                                    'Je suis désolé, j’ai oublié mes devoirs à la maison.',
+                                    'J’étais absent la semaine dernière.'
+                                ],
+                                'locale' => 'fr',
+                                'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                                'title' => 'LES ELUCUBRATIONS'
+                            ],
+                        ],
+                        'is_active' => false,
+                        'picture' => 'http://lorempixel.com/640/480/',
+                        'start_date' => '20/12/2021',
+                    ],
+                    'links' => [
+                        'self' => 'http://localhost/api/events/1',
+                    ],
+                    'relationships' => [
+                        'address' => [
+                            'data' => null
+                        ],
+                        'user' => [
+                            'data' => null
+                        ]
+                    ]
+                ]
+            ]);
+    }
+
+    public function test_can_show_event_when_user_is_connected_return_Http_code_200_with_all_translations()
+    {
+        // Arrange
+        $event = factory(Event::class)->create([
+            'start_date' => '2021-12-20',
+            'picture' => 'http://lorempixel.com/640/480/',
+        ]);
+
+        $frenshTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+            'event_id' => $event->id,
+            'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
+            'locale' => 'fr',
+            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+            'title' => 'LES ELUCUBRATIONS',
+        ]);
+
+        $englishTranslation = factory(EventTranslation::class)->create([
+            'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+            'event_id' => $event->id,
+            'event_program' => ['I\'m sorry, I forgot my homework.', 'I was away last week.'],
+            'locale' => 'en',
+            'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+            'title' => 'THE ELUCUBRATIONS'
+        ]);
+
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('GET', route('events.show', $event->id));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertJson([
+                'data' => [
+                    'type' => 'events',
+                    'id' => 1,
+                    'attributes' => [
+                        'event_translations' => [
+                            [
+                                'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+                                'event_program' => [
+                                    'I\'m sorry, I forgot my homework.',
+                                    'I was away last week.'
+                                ],
+                                'locale' => 'en',
+                                'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+                                'title' => 'THE ELUCUBRATIONS'
+                            ],
+                            [
+                                'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+                                'event_program' => [
+                                    'Je suis désolé, j’ai oublié mes devoirs à la maison.',
+                                    'J’étais absent la semaine dernière.'
+                                ],
+                                'locale' => 'fr',
+                                'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                                'title' => 'LES ELUCUBRATIONS'
+                            ],
+                        ],
+                        'is_active' => false,
+                        'picture' => 'http://lorempixel.com/640/480/',
+                        'start_date' => '20/12/2021',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
@@ -275,16 +468,24 @@ class EventControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'additionel_information' => 'Des informations utile.',
-            'end_date' => '2021-12-21',
-            'event_program' => ['Des informations utile.', 'Des informations utile.'],
-            'picture' => UploadedFile::fake()->image('avatar.jpg'),
-            'publish_at' => '2021-12-20',
-            'start_date' => '2021-12-20',
-            'start_time' => '12:00',
-            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-            'title' => 'LES ELUCUBRATIONS',
+            'attributes' => [
+                'event' => [
+                    'end_date' => '2021-12-21',
+                    'picture' => UploadedFile::fake()->image('avatar.jpg'),
+                    'start_date' => '2021-12-20',
+                    'start_time' => '12:00',
+                ],
+                'event_translate_data' => [
+                    'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+                    'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
+                    'locale' => 'fr',
+                    'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                    'title' => 'LES ELUCUBRATIONS',
+                ]
+            ]
         ];
+
+        $time = time();
 
         // Action
         $response = $this->actingAs($this->user, 'api')->json('POST', route('events.store'), $data);
@@ -297,16 +498,33 @@ class EventControllerTest extends TestCase
                     'type' => 'events',
                     'id' => 1,
                     'attributes' => [
-                        'additionel_information' => 'Des informations utile.',
                         'end_date' => '21/12/2021',
-                        'event_program' => ['Des informations utile.', 'Des informations utile.'],
+                        'event_translations' => [
+                            [
+                                'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+                                'event_program' => [
+                                    'I\'m sorry, I forgot my homework.',
+                                    'I was away last week.'
+                                ],
+                                'locale' => 'en',
+                                'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+                                'title' => 'THE ELUCUBRATIONS'
+                            ],
+                            [
+                                'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+                                'event_program' => [
+                                    'Je suis désolé, j’ai oublié mes devoirs à la maison.',
+                                    'J’étais absent la semaine dernière.'
+                                ],
+                                'locale' => 'fr',
+                                'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                                'title' => 'LES ELUCUBRATIONS'
+                            ],
+                        ],
                         'is_active' => false,
-                        'picture' => 'http://localhost/api/public/uploads/images/LES_ELUCUBRATIONS_'. time() .'.jpg',
-                        'publish_at' => '20/12/2021',
+                        'picture' => 'http://localhost/api/public/uploads/images/event_1_'. $time .'.jpg',
                         'start_date' => '20/12/2021',
                         'start_time' => '12:00',
-                        'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-                        'title' => 'LES ELUCUBRATIONS',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
@@ -335,30 +553,7 @@ class EventControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_can_store_event_when_event_title_exists_return_Http_code_422()
-    {
-        // Arrange
-        $event = factory(Event::class)->create([
-            'title' => 'ELUCUBRATIONS',
-        ]);
-
-        $data = [
-            'additionel_information' => 'Des informations utile.',
-            'start_date' => '2021-12-20',
-            'picture' => UploadedFile::fake()->image('avatar.jpg'),
-            'publish_at' => '2021-12-20',
-            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-            'title' => 'ELUCUBRATIONS',
-        ];
-
-        // Action
-        $response = $this->actingAs($this->user, 'api')->json('POST', route('events.store'), $data);
-
-        // Assert
-        $response->assertStatus(422);
-    }
-
-    // Update
+    // // Update
 
     public function test_can_update_event_when_user_is_not_connected_Http_code_401()
     {
@@ -379,15 +574,22 @@ class EventControllerTest extends TestCase
         $event = factory(Event::class)->create();
 
         $data = [
-            'additionel_information' => 'Des informations utile.',
-            'end_date' => '2021-12-21',
-            'event_program' => ['Des informations utile.', 'Des informations utile.'],
-            'picture' => UploadedFile::fake()->image('avatar.jpg'),
-            'publish_at' => '2021-12-20',
-            'start_date' => '2021-12-20',
-            'start_time' => '12:00',
-            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-            'title' => 'LES ELUCUBRATIONS',
+            'attributes' => [
+                'event' => [
+                    'end_date' => '2021-12-21',
+                    'picture' => UploadedFile::fake()->image('avatar.jpg'),
+                    'publish_at' => '2021-12-20',
+                    'start_date' => '2021-12-20',
+                    'start_time' => '12:00',
+                ],
+                'event_translate_data' => [
+                    'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+                    'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
+                    'locale' => 'fr',
+                    'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                    'title' => 'LES ELUCUBRATIONS',
+                ]
+            ]
         ];
 
         // Action
@@ -410,26 +612,6 @@ class EventControllerTest extends TestCase
         $response->assertNotFound();
     }
 
-    public function test_can_update_event_when_event_title_exists_return_Http_code_422()
-    {
-        // Arrange
-        $event = factory(Event::class)->create([
-            'title' => 'ELUCUBRATIONS',
-        ]);
-
-        $secondEvent =  factory(Event::class)->create();
-
-        $data = [
-            'title' => 'ELUCUBRATIONS',
-        ];
-
-        // Action
-        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $secondEvent->id), $data);
-
-        // Assert
-        $response->assertStatus(422);
-    }
-
     public function test_can_update_event_without_giving_data_return_Http_code_200()
     {
         // Arrange
@@ -446,26 +628,9 @@ class EventControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'picture' => UploadedFile::fake()->image('avatar.jpg'),
-        ];
-
-        $event = factory(Event::class)->create();
-
-        // Action
-        $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $event->id), $data);
-
-        // Assert
-        $response->assertStatus(200);
-    }
-
-    public function test_can_update_event_when_data_contains_a_date_and_publish_at_return_Http_code_200()
-    {
-        // Arrange
-        $data = [
-            'end_date' => '2020-12-21',
-            'publish_at' => '2020-12-20',
-            'start_date' => '2020-12-20',
-            'start_time' => '12:00',
+            'event' => [
+                'picture' => UploadedFile::fake()->image('avatar.jpg'),
+            ]
         ];
 
         $event = factory(Event::class)->create();
@@ -481,19 +646,38 @@ class EventControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'additionel_information' => 'Des informations utile.',
-            'end_date' => '2021-12-21',
-            'event_program' => ['Des informations utile.', 'Des informations utile.'],
-            'picture' => UploadedFile::fake()->image('avatar.jpg'),
-            'publish_at' => '2021-12-20',
-            'start_date' => '2021-12-20',
-            'start_time' => '12:00',
-            'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-            'title' => 'LES ELUCUBRATIONS',
+            'attributes' => [
+                'event' => [
+                    'end_date' => '2021-12-21',
+                    'picture' => UploadedFile::fake()->image('avatar.jpg'),
+                    'publish_at' => '2021-12-20',
+                    'start_date' => '2021-12-20',
+                    'start_time' => '12:00',
+                ],
+                'event_translate_data' => [
+                    'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+                    'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
+                    'locale' => 'fr',
+                    'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                    'title' => 'LES ELUCUBRATIONS',
+                ]
+            ]
         ];
+
+        $time = time();
 
         $event = factory(Event::class)->create();
         $event->user()->associate($this->user)->save();
+
+        $frenshTranslation = factory(EventTranslation::class)->create([
+            'locale' => 'fr',
+            'event_id' => $event->id
+        ]);
+
+        $englishTranslation = factory(EventTranslation::class)->create([
+            'locale' => 'en',
+            'event_id' => $event->id
+        ]);
 
         // Action
         $response = $this->actingAs($this->user, 'api')->json('PUT', route('events.update', $event->id), $data);
@@ -506,16 +690,34 @@ class EventControllerTest extends TestCase
                     'type' => 'events',
                     'id' => 1,
                     'attributes' => [
-                        'additionel_information' => 'Des informations utile.',
                         'end_date' => '21/12/2021',
-                        'event_program' => ['Des informations utile.', 'Des informations utile.'],
+                        'event_translations' => [
+                            [
+                                'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
+                                'event_program' => [
+                                    'I\'m sorry, I forgot my homework.',
+                                    'I was away last week.'
+                                ],
+                                'locale' => 'en',
+                                'subtitle' => 'CARCASSONNE FESTIVAL 2020',
+                                'title' => 'THE ELUCUBRATIONS'
+                            ],
+                            [
+                                'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
+                                'event_program' => [
+                                    'Je suis désolé, j’ai oublié mes devoirs à la maison.',
+                                    'J’étais absent la semaine dernière.'
+                                ],
+                                'locale' => 'fr',
+                                'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
+                                'title' => 'LES ELUCUBRATIONS'
+                            ],
+                        ],
                         'is_active' => false,
-                        'picture' => 'http://localhost/api/public/uploads/images/LES_ELUCUBRATIONS_'. time() .'.jpg',
+                        'picture' => 'http://localhost/api/public/uploads/images/event_1_'. $time .'.jpg',
                         'publish_at' => '20/12/2021',
                         'start_date' => '20/12/2021',
                         'start_time' => '12:00',
-                        'subtitle' => 'FESTIVAL DE CARCASSONNE 2020',
-                        'title' => 'LES ELUCUBRATIONS',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/events/1',
