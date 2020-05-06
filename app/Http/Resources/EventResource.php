@@ -44,7 +44,7 @@ class EventResource extends JsonResource
                 }),
                 $this->mergeWhen($this->translations()->exists(), function () {
                     return [
-                        'event_translations' => $this->translations->map(function ($translation) {
+                        'event_translations' => $this->translations_needed->map(function ($translation) {
                             return $translation->makeHidden([
                                 'created_at', 'deleted_at', 'event_id', 'id', 'updated_at'
                             ])->toArray();
@@ -53,7 +53,9 @@ class EventResource extends JsonResource
                 }),
                 'is_active' => $this->is_active,
                 'picture' => $this->picture,
-                'publish_at' => $this->formatted_publish_at,
+                'publish_at' => $this->when(isset($this->formatted_publish_at), function () {
+                    return $this->formatted_publish_at;
+                }),
                 'start_date' => $this->formatted_start_date,
                 'start_time' => $this->when(isset($this->formatted_start_time), function () {
                     return $this->formatted_start_time;
@@ -77,6 +79,15 @@ class EventResource extends JsonResource
                         return [
                             'type' => 'tickets',
                             'id' => $ticket->id
+                        ];
+                    }) : null
+                ],
+                'translations' => [
+                    'data' => $this->translations()->exists() ?
+                    $this->translations->map(function ($translation) {
+                        return [
+                            'type' => 'translations',
+                            'id' => $translation->id
                         ];
                     }) : null
                 ],
