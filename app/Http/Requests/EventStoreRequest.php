@@ -28,7 +28,6 @@ class EventStoreRequest extends FormRequest
             'attributes.event' => 'array|required',
             'attributes.event.end_date' => 'date_format:Y-m-d|nullable',
             'attributes.event.picture' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048|required_with:event',
-            'attributes.event.publish_at' => 'date_format:Y-m-d|nullable',
             'attributes.event.start_date' => 'date_format:Y-m-d|required_with:event',
             'attributes.event.start_time' => 'date_format:H:i|nullable',
             'attributes.event_translate_data' => 'array|required',

@@ -16,8 +16,3 @@ $factory->define(Event::class, function (Faker $faker) {
         'start_time' => Carbon::parse('12:00'),
     ];
 });
-
-// 'event_program' => $faker->sentences($nb = 3),
-// 'additionel_information' => $faker->text,
-// 'subtitle' => $faker->sentence,
-// 'title' => $faker->word,

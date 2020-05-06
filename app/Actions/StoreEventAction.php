@@ -21,7 +21,6 @@ class StoreEventAction
             'end_date' => Carbon::parse($attributes['end_date']),
             'is_active' => false,
             'picture' => $this->uploadOne($attributes['picture'], '/uploads/images/', 'public', Event::count() + 1),
-            'publish_at' => Carbon::parse($attributes['publish_at']),
             'start_date' => Carbon::parse($attributes['start_date']),
             'start_time' => Carbon::parse($attributes['start_time']),
         ]);
