@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 
 class Event extends Model
 {
@@ -73,7 +75,9 @@ class Event extends Model
      */
     public function getFormattedPublishAtAttribute()
     {
-        return $this->publish_at->format('d/m/Y');
+        return isset($this->publish_at)
+            ? $this->publish_at->format('d/m/Y')
+            : null;
     }
 
     /**
@@ -120,6 +124,28 @@ class Event extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Get the translations attribute.
+     *
+     * @var string
+     */
+    public function getTranslationsNeededAttribute()
+    {
+        $user = Auth::guard('api')->user();
+
+        if (isset($user)) {
+            return $this->translations;
+        } else {
+            $locale = App::getLocale();
+
+            return collect([
+                $this->translations
+                    ->where('locale', $locale)
+                    ->first()
+            ]);
+        }
     }
 
     /**
