@@ -4,20 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Actions\StoreEventAction;
 use App\Actions\StoreEventTranslationAction;
+use App\Actions\UpdateEventAction;
+use App\Actions\UpdateEventTranslationAction;
 use App\Event;
 use App\Http\Requests\EventStoreRequest;
 use App\Http\Requests\EventUpdateRequest;
 use App\Http\Resources\EventCollection;
 use App\Http\Resources\EventResource;
-use App\Traits\UploadTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
-    use UploadTrait;
-
     /**
      * Display a listing of the resource.
      *
@@ -77,33 +77,25 @@ class EventController extends Controller
      */
     public function update(EventUpdateRequest $request, Event $event)
     {
-        $eventAttributes = $request->validated();
+        try {
+            DB::beginTransaction();
 
+            $data = $request->validated();
 
-        if (isset($eventAttributes['end_date'])) {
-            $eventAttributes['end_date'] = Carbon::parse($eventAttributes['end_date']);
+            if ($request->filled('attributes.event')) {
+                (new UpdateEventAction)->execute($event, $data['attributes']['event']);
+            }
+
+            if ($request->filled('attributes.event_translate_data')) {
+                (new UpdateEventTranslationAction)->execute($event, $data['attributes']['event_translate_data']);
+            }
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            throw $exception;
         }
-
-        if (isset($eventAttributes['picture'])) {
-            $name = $eventAttributes['title'] ?? $event->title;
-            $eventAttributes['picture'] = $this->uploadOne($eventAttributes['picture'], '/uploads/images/', 'public', $name);
-        }
-
-        if (isset($eventAttributes['publish_at'])) {
-            $eventAttributes['publish_at'] = Carbon::parse($eventAttributes['publish_at']);
-        }
-
-        if (isset($eventAttributes['start_date'])) {
-            $eventAttributes['start_date'] = Carbon::parse($eventAttributes['start_date']);
-        }
-
-        if (isset($eventAttributes['start_time'])) {
-            $eventAttributes['start_time'] = Carbon::parse($eventAttributes['start_time']);
-        }
-
-        $event->fill($eventAttributes);
-
-        $event->save();
 
         return new EventResource($event);
     }

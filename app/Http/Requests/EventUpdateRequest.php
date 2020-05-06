@@ -24,15 +24,18 @@ class EventUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'additionel_information' => 'string',
-            'end_date' => 'date_format:Y-m-d',
-            'event_program' =>'array',
-            'picture' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'publish_at' => 'date_format:Y-m-d',
-            'start_date' => 'date_format:Y-m-d',
-            'start_time' => 'date_format:H:i',
-            'subtitle' => 'string|max:255',
-            'title' => 'string|unique:events|max:255',
+            'attributes' => 'array',
+            'attributes.event' => 'array',
+            'attributes.event.end_date' => 'date_format:Y-m-d|nullable',
+            'attributes.event.picture' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'attributes.event.start_date' => 'date_format:Y-m-d',
+            'attributes.event.start_time' => 'date_format:H:i|nullable',
+            'attributes.event_translate_data' => 'array',
+            'attributes.event_translate_data.additionel_information' => 'string',
+            'attributes.event_translate_data.event_program' => ' array|nullable',
+            'attributes.event_translate_data.locale' => 'string',
+            'attributes.event_translate_data.subtitle' => 'string|max:255',
+            'attributes.event_translate_data.title' => 'string|max:255',
         ];
     }
 }
