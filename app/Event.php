@@ -116,7 +116,7 @@ class Event extends Model
         $price = number_format(($this->tickets->min('price') / 100), 2, '.', '');
 
         if ($ticketsCount > 1) {
-            return preg_replace('/\s+/', ' ', trim("A Partir de {$price} €", " ,\t\n\r\0\x0B"));
+            return preg_replace('/\s+/', ' ', trim(trans("From") . " {$price} €", " ,\t\n\r\0\x0B"));
         }
 
         if ($ticketsCount == 1) {
@@ -173,7 +173,7 @@ class Event extends Model
     }
 
     /**
-     * Get the tickets for the event.
+     * Get the translations for the event.
      */
     public function translations()
     {
