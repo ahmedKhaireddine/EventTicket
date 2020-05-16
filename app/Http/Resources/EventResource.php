@@ -35,9 +35,7 @@ class EventResource extends JsonResource
                             'number_of_tickets_remaining' => $this->total_tickets_remaining,
                             'format_price_to_display' => $this->formatted_price,
                             'tickets' => $this->tickets->map(function ($ticket) {
-                                return $ticket->makeHidden([
-                                    'created_at', 'deleted_at', 'event_id', 'id', 'updated_at'
-                                ])->toArray();
+                                return new TicketResource($ticket);
                             })
                         ],
                     ];

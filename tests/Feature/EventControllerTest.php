@@ -6,6 +6,7 @@ use App\Address;
 use App\Event;
 use App\EventTranslation;
 use App\Ticket;
+use App\TicketTranslation;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -58,7 +59,7 @@ class EventControllerTest extends TestCase
             'country' => 'Bahamas',
             'postal_code' => '95929-9607',
             'street_address' => '2316 Clemmie Throughway',
-            'venue' => 'Maggio LLC'
+            'venue' => 'Maggio LLC',
         ]);
 
         $event = factory(Event::class)->create([
@@ -69,7 +70,7 @@ class EventControllerTest extends TestCase
             'start_time' => '12:00',
         ]);
 
-        $frenshTranslation = factory(EventTranslation::class)->create([
+        $frenshEventTranslation = factory(EventTranslation::class)->create([
             'additionel_information' => 'Excusez-moi, je ne me sens pas bien, est-ce que je peux aller à l’infirmerie ?',
             'event_id' => $event->id,
             'event_program' => ['Je suis désolé, j’ai oublié mes devoirs à la maison.', 'J’étais absent la semaine dernière.'],
@@ -78,31 +79,36 @@ class EventControllerTest extends TestCase
             'title' => 'LES ELUCUBRATIONS',
         ]);
 
-        $englishTranslation = factory(EventTranslation::class)->create([
+        $englishEventTranslation = factory(EventTranslation::class)->create([
             'additionel_information' => 'Excuse me, I don\'t feel well, can I go to the infirmary?',
             'event_id' => $event->id,
             'event_program' => ['I\'m sorry, I forgot my homework.', 'I was away last week.'],
             'locale' => 'en',
             'subtitle' => 'CARCASSONNE FESTIVAL 2020',
-            'title' => 'THE ELUCUBRATIONS'
+            'title' => 'THE ELUCUBRATIONS',
         ]);
 
         $ticket = factory(Ticket::class)->create([
-            'description' => 'Des informations utile.',
             'event_id' => $event->id,
             'price' => 2000,
             'tickets_number' => 3000,
             'tickets_remain' => 3000,
-            'type' => 'Block A'
         ]);
 
-        $ticketTwo = factory(Ticket::class)->create([
-            'description' => 'Des informations utile.',
-            'event_id' => $event->id,
-            'price' => 1500,
-            'tickets_number' => 1000,
-            'tickets_remain' => 1000,
-            'type' => 'Block C'
+        $frenshTicketTranslation = factory(TicketTranslation::class)->create([
+            'description' => 'Cette block vous le trouvez devant la seins.',
+            'locale' => 'fr',
+            'location' => 'Block A',
+            'ticket_id' => $ticket->id,
+            'type' => 'Gratuit',
+        ]);
+
+        $englishTicketTranslation = factory(TicketTranslation::class)->create([
+            'description' => 'This block you find it in front of the breast.',
+            'locale' => 'en',
+            'location' => 'Block A',
+            'ticket_id' => $ticket->id,
+            'type' => 'Free',
         ]);
 
         $event->address()->associate($address)->save();
@@ -118,7 +124,7 @@ class EventControllerTest extends TestCase
                 'data' => [
                     [
                         'type' => 'events',
-                        'id' => 1,
+                        'id' => $event->id,
                         'attributes' => [
                             'address' => [
                                 'additionel_information' => 'Suite 584',
@@ -131,24 +137,38 @@ class EventControllerTest extends TestCase
                             ],
                             'end_date' => '21/12/2021',
                             'event_tickets' => [
-                                'total_number_of_tickets' => 4000,
-                                'number_of_tickets_remaining' => 4000,
-                                'format_price_to_display' => 'A Partir de 15.00 €',
+                                'total_number_of_tickets' => 3000,
+                                'number_of_tickets_remaining' => 3000,
+                                'format_price_to_display' => '20.00 €',
                                 'tickets' => [
                                     [
-                                        'description' => 'Des informations utile.',
-                                        'price' => 2000,
-                                        'tickets_number' => 3000,
-                                        'tickets_remain' => 3000,
-                                        'type' => 'Block A'
+                                        'type' => 'tickets',
+                                        'id' => $ticket->id,
+                                        'attributes' => [
+                                            'price' => 2000,
+                                            'ticket_translations' => [
+                                                [
+                                                    'description' => 'This block you find it in front of the breast.',
+                                                    'locale' => 'en',
+                                                    'location' => 'Block A',
+                                                    'type' => 'Free',
+                                                ]
+                                            ],
+                                            'tickets_number' => 3000,
+                                            'tickets_remain' => 3000,
+                                        ],
+                                        'links' => [
+                                            'self' => 'http://localhost/api/tickets/1',
+                                        ],
+                                        'relationships' => [
+                                            'event' => [
+                                                'data' => [
+                                                    'type' => 'events',
+                                                    'id' => $event->id
+                                                ]
+                                            ],
+                                        ]
                                     ],
-                                    [
-                                        'description' => 'Des informations utile.',
-                                        'price' => 1500,
-                                        'tickets_number' => 1000,
-                                        'tickets_remain' => 1000,
-                                        'type' => 'Block C'
-                                    ]
                                 ]
                             ],
                             'event_translations' => [
@@ -183,10 +203,6 @@ class EventControllerTest extends TestCase
                                     [
                                         'type' => 'tickets',
                                         'id' => $ticket->id
-                                    ],
-                                    [
-                                        'type' => 'tickets',
-                                        'id' => $ticketTwo->id
                                     ]
                                 ]
                             ],
