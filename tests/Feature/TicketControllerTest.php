@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Event;
 use App\Ticket;
+use App\TicketTranslation;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,12 +28,26 @@ class TicketControllerTest extends TestCase
         $this->event = factory(Event::class)->create();
 
         $this->ticket = factory(Ticket::class)->create([
-            'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
             'event_id' => $this->event->id,
             'price' => 2000,
             'tickets_number' => 50000,
             'tickets_remain' => 50000,
-            'type' => 'Block C',
+        ]);
+
+        $frenshTranslation = factory(TicketTranslation::class)->create([
+            'description' => 'Cette block vous le trouvez devant la seins.',
+            'locale' => 'fr',
+            'location' => 'Block A',
+            'ticket_id' => $this->ticket->id,
+            'type' => 'Gratuit',
+        ]);
+
+        $englishTranslation = factory(TicketTranslation::class)->create([
+            'description' => 'This block you find it in front of the breast.',
+            'locale' => 'en',
+            'location' => 'Block A',
+            'ticket_id' => $this->ticket->id,
+            'type' => 'Free',
         ]);
 
         $this->fakeTicketId = Ticket::all()->count() + 1;
@@ -68,7 +83,7 @@ class TicketControllerTest extends TestCase
         $response->assertNotFound();
     }
 
-    public function test_can_show_ticket_when_user_is_connected_and_ticket_exists_return_Http_code_200()
+    public function test_can_show_ticket_when_user_is_connected_and_ticket_exists_and_locale_en_return_Http_code_200_with_english_translation()
     {
         // Action
         $response = $this->actingAs($this->user, 'api')->json('GET', route('tickets.show', $this->ticket));
@@ -80,11 +95,23 @@ class TicketControllerTest extends TestCase
                     'type' => 'tickets',
                     'id' => 1,
                     'attributes' => [
-                        'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
                         'price' => 2000,
+                        'ticket_translations' => [
+                            [
+                                'description' => 'This block you find it in front of the breast.',
+                                'locale' => 'en',
+                                'location' => 'Block A',
+                                'type' => 'Free',
+                            ],
+                            [
+                                'description' => 'Cette block vous le trouvez devant la seins.',
+                                'locale' => 'fr',
+                                'location' => 'Block A',
+                                'type' => 'Gratuit',
+                            ],
+                        ],
                         'tickets_number' => 50000,
                         'tickets_remain' => 50000,
-                        'type' => 'Block C',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/tickets/1'
@@ -107,13 +134,19 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 50000,
-                'type' => 'Block B',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 2000,
-            ],
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 60000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -127,13 +160,19 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 50000,
-                'type' => 'Block B',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 2000,
-            ],
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 60000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -148,7 +187,18 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
+            'attributes' => [
+                'ticket' => [
+                    'number' => 60000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -162,12 +212,35 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'ticket' => [
-                'number' => 50000,
-                'type' => 'Block B',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 2000,
-            ],
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
+        ];
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('POST', route('tickets.store'), $data);
+
+        // Assert
+        $response->assertStatus(422);
+    }
+
+    public function test_can_store_ticket_when_we_dont_provided_ticket_translation_data_return_Http_code_422()
+    {
+        // Arrange
+        $data = [
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 60000,
+                    'price' => 3000,
+                ],
+            ]
         ];
 
         // Action
@@ -181,13 +254,19 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 50000,
-                'type' => 'Block B',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 2000,
-            ],
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 60000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Vous trouvez cette zone à l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -200,11 +279,23 @@ class TicketControllerTest extends TestCase
                     'type' => 'tickets',
                     'id' => 2,
                     'attributes' => [
-                        'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                        'price' => 2000,
-                        'tickets_number' => 50000,
-                        'tickets_remain' => 50000,
-                        'type' => 'Block B',
+                        'price' => 3000,
+                        'ticket_translations' => [
+                            [
+                                'description' => 'You find this area upstairs.',
+                                'locale' => 'en',
+                                'location' => 'Zone B',
+                                'type' => 'Paying',
+                            ],
+                            [
+                                'description' => 'Vous trouvez cette zone à l\'étage.',
+                                'locale' => 'fr',
+                                'location' => 'Zone B',
+                                'type' => 'Payant',
+                            ],
+                        ],
+                        'tickets_number' => 60000,
+                        'tickets_remain' => 60000,
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/tickets/2'
@@ -227,14 +318,19 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 50000,
-                'type' => 'Block C',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 2000,
-            ],
-            'ticket_id' => $this->ticket->id
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 40000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -248,14 +344,19 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 60000,
-                'type' => 'Block U',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 3000,
-            ],
-            'ticket_id' => $this->ticket->id
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 40000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -270,14 +371,19 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 50000,
-                'type' => 'Block C',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 2000,
-            ],
-            'ticket_id' => $this->ticket->id
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 40000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -291,13 +397,18 @@ class TicketControllerTest extends TestCase
     {
         // Arrange
         $data = [
-            'ticket' => [
-                'number' => 60000,
-                'type' => 'Block D',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 3000,
-            ],
-            'ticket_id' => $this->ticket->id
+            'attributes' => [
+                'ticket' => [
+                    'number' => 40000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -307,17 +418,21 @@ class TicketControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_can_update_ticket_when_we_dont_provided_ticket_id_return_Http_code_422()
+    public function test_can_update_ticket_when_we_dont_provided_locale_return_Http_code_422()
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 60000,
-                'type' => 'Block D',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 3000,
-            ],
+            'attributes' => [
+                'ticket' => [
+                    'number' => 40000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -333,14 +448,19 @@ class TicketControllerTest extends TestCase
         $anotherEvent = factory(Event::class)->create([]);
 
         $data = [
-            'event_id' => $anotherEvent->id,
-            'ticket' => [
-                'number' => 60000,
-                'type' => 'Block D',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 3000,
-            ],
-            'ticket_id' => $this->ticket->id
+            'attributes' => [
+                'event_id' => $anotherEvent->id,
+                'ticket' => [
+                    'number' => 40000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -351,42 +471,23 @@ class TicketControllerTest extends TestCase
             ->assertSeeText('The ticket is not related to the event provided.');
     }
 
-    public function test_can_update_ticket_when_we_dont_provided_ticket_id_return_Http_code_500()
-    {
-        // Arrange
-        $anotherTicket = factory(Ticket::class)->create([]);
-
-        $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 60000,
-                'type' => 'Block D',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 3000,
-            ],
-            'ticket_id' => $this->ticket->id
-        ];
-
-        // Action
-        $response = $this->actingAs($this->user, 'api')->json('PUT', route('tickets.update', $anotherTicket), $data);
-
-        // Assert
-        $response->assertStatus(500)
-            ->assertSeeText('The ticket identifier passed in the request parameter does not match with ticket to retrieve.');
-    }
-
     public function test_can_update_ticket_when_we_provided_all_params_return_Http_code_200()
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'number' => 60000,
-                'type' => 'Block U',
-                'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
-                'price' => 3000,
-            ],
-            'ticket_id' => $this->ticket->id
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 60000,
+                    'price' => 3000,
+                ],
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -399,11 +500,23 @@ class TicketControllerTest extends TestCase
                     'type' => 'tickets',
                     'id' => 1,
                     'attributes' => [
-                        'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
                         'price' => 3000,
+                        'ticket_translations' => [
+                            [
+                              'description' => 'This area you find it upstairs.',
+                              'locale' => 'en',
+                              'location' => 'Zone B',
+                              'type' => 'Paying',
+                            ],
+                            [
+                              'description' => 'Cette zone vous le trouver a l\'étage.',
+                              'locale' => 'fr',
+                              'location' => 'Zone B',
+                              'type' => 'Payant',
+                            ],
+                        ],
                         'tickets_number' => 60000,
                         'tickets_remain' => 60000,
-                        'type' => 'Block U',
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/tickets/1'
@@ -420,15 +533,19 @@ class TicketControllerTest extends TestCase
             ]);
     }
 
-    public function test_can_update_ticket_when_we_dont_provided_all_ticket_data_return_Http_code_200()
+    public function test_can_update_ticket_when_we_dont_provided_ticket_translation_data_return_Http_code_200()
     {
         // Arrange
         $data = [
-            'event_id' => $this->event->id,
-            'ticket' => [
-                'price' => 4000,
-            ],
-            'ticket_id' => $this->ticket->id
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket_translation_data' => [
+                    'description' => 'Cette zone vous le trouver a l\'étage.',
+                    'locale' => 'fr',
+                    'location' => 'Zone B',
+                    'type' => 'Payant',
+                ]
+            ]
         ];
 
         // Action
@@ -441,11 +558,105 @@ class TicketControllerTest extends TestCase
                     'type' => 'tickets',
                     'id' => 1,
                     'attributes' => [
-                        'description' => 'Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.',
+                        'price' => 2000,
+                        'ticket_translations' => [
+                            [
+                              'description' => 'This area you find it upstairs.',
+                              'locale' => 'en',
+                              'location' => 'Zone B',
+                              'type' => 'Paying',
+                            ],
+                            [
+                              'description' => 'Cette zone vous le trouver a l\'étage.',
+                              'locale' => 'fr',
+                              'location' => 'Zone B',
+                              'type' => 'Payant',
+                            ],
+                        ],
+                        'tickets_number' => 50000,
+                        'tickets_remain' => 50000,
+                    ],
+                    'links' => [
+                        'self' => 'http://localhost/api/tickets/1'
+                    ],
+                    'relationships' => [
+                        'event' => [
+                            'data' => [
+                                'type' => 'events',
+                                'id' => $this->event->id
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+    }
+
+    public function test_can_update_ticket_when_we_dont_provided_ticket_price_return_Http_code_200()
+    {
+        // Arrange
+        $data = [
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'price' => 4000,
+                ],
+            ]
+        ];
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('tickets.update', $this->ticket->id), $data);
+
+        // Assert
+        $response->assertOk()
+            ->assertJson([
+                'data' => [
+                    'type' => 'tickets',
+                    'id' => 1,
+                    'attributes' => [
                         'price' => 4000,
                         'tickets_number' => 50000,
                         'tickets_remain' => 50000,
-                        'type' => 'Block C',
+                    ],
+                    'links' => [
+                        'self' => 'http://localhost/api/tickets/1'
+                    ],
+                    'relationships' => [
+                        'event' => [
+                            'data' => [
+                                'type' => 'events',
+                                'id' => $this->event->id
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+    }
+
+    public function test_can_update_ticket_when_we_dont_provided_ticket_number_return_Http_code_200()
+    {
+        // Arrange
+        $data = [
+            'attributes' => [
+                'event_id' => $this->event->id,
+                'ticket' => [
+                    'number' => 30000,
+                ],
+            ]
+        ];
+
+        // Action
+        $response = $this->actingAs($this->user, 'api')->json('PUT', route('tickets.update', $this->ticket->id), $data);
+
+        // Assert
+        $response->assertOk()
+            ->assertJson([
+                'data' => [
+                    'type' => 'tickets',
+                    'id' => 1,
+                    'attributes' => [
+                        'price' => 2000,
+                        'tickets_number' => 30000,
+                        'tickets_remain' => 30000,
                     ],
                     'links' => [
                         'self' => 'http://localhost/api/tickets/1'
