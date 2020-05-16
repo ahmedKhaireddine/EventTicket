@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\StoreTicketAction;
+use App\Actions\UpdateTicketAction;
 use App\Http\Requests\TicketStoreRequest;
 use App\Http\Requests\TicketUpdateRequest;
 use App\Http\Resources\TicketResource;
 use App\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
@@ -18,16 +21,19 @@ class TicketController extends Controller
      */
     public function store(TicketStoreRequest $request)
     {
-        $attributes = $request->validated();
+        try {
+            DB::beginTransaction();
 
-        $ticket = Ticket::create([
-            'description' => $attributes['ticket']['description'],
-            'event_id' => $attributes['event_id'],
-            'price' => $attributes['ticket']['price'],
-            'tickets_number' => $attributes['ticket']['number'],
-            'tickets_remain' => $attributes['ticket']['number'],
-            'type' => $attributes['ticket']['type'],
-        ]);
+            $data = $request->validated();
+
+            $ticket = (new StoreTicketAction)->execute($data['attributes']);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            throw $exception;
+        }
 
         return new TicketResource($ticket);
     }
@@ -52,21 +58,19 @@ class TicketController extends Controller
      */
     public function update(TicketUpdateRequest $request, Ticket $ticket)
     {
-        $attributes = $request->validated();
+        try {
+            DB::beginTransaction();
 
-        if ($attributes['ticket_id'] != $ticket->id) {
-            abort(500, trans('The ticket identifier passed in the request parameter does not match with ticket retrieved.'));
+            $data = $request->validated();
+
+            (new UpdateTicketAction)->execute($ticket, $data['attributes']);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            throw $exception;
         }
-
-        if (isset($attributes['ticket']['number'])) {
-            $attributes['ticket']['tickets_number'] = $attributes['ticket']['number'];
-            $attributes['ticket']['tickets_remain'] = $attributes['ticket']['number'];
-            unset($attributes['ticket']['number']);
-        }
-
-        $ticket->fill($attributes['ticket']);
-
-        $ticket->save();
 
         return new TicketResource($ticket);
     }

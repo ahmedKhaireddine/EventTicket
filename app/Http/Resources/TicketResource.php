@@ -20,11 +20,18 @@ class TicketResource extends JsonResource
             'attributes' => [
                 'created_at' => $this->created_at->toDateTimeString(),
                 'updated_at' => $this->updated_at->toDateTimeString(),
-                'description' => $this->description,
                 'price' => $this->price,
+                $this->mergeWhen($this->translations()->exists(), function () {
+                    return [
+                        'ticket_translations' => $this->translations_needed->map(function ($translation) {
+                            return $translation->makeHidden([
+                                'created_at', 'deleted_at', 'ticket_id', 'id', 'updated_at'
+                            ])->toArray();
+                        }),
+                    ];
+                }),
                 'tickets_number' => $this->tickets_number,
                 'tickets_remain' => $this->tickets_remain,
-                'type' => $this->type,
             ],
             'links' => [
                 'self' => route('tickets.show', [

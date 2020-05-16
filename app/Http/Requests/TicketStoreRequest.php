@@ -24,12 +24,16 @@ class TicketStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'event_id' => 'integer|exists:events,id|required',
-            'ticket' => 'array|required',
-            'ticket.number' => 'integer|required_with:ticket',
-            'ticket.type' => 'string|required_with:ticket',
-            'ticket.description' => 'string|required_with:ticket',
-            'ticket.price' => 'integer|required_with:ticket'
+            'attributes' => 'array|required',
+            'attributes.event_id' => 'integer|exists:events,id|required',
+            'attributes.ticket' => 'array|required_with:attributes',
+            'attributes.ticket.number' => 'integer|required',
+            'attributes.ticket.price' => 'integer|required',
+            'attributes.ticket_translation_data' => 'array|required_with:attributes',
+            'attributes.ticket_translation_data.description' => 'string|required',
+            'attributes.ticket_translation_data.locale' => 'string|required',
+            'attributes.ticket_translation_data.location' => 'string|required',
+            'attributes.ticket_translation_data.type' => 'string|required',
         ];
     }
 }
